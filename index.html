@@ -1956,9 +1956,6 @@ scrollbar-width:none; -ms-overflow-style:none;
 .chat-ask-inp-wrap { position:relative; }
 .chat-ask-inp-wrap .chat-ask-input,
 .chat-ask-inp-wrap .chat-ask-input.ce-box { padding-right:38px; }
-.chat-ask-bulk { padding:9px 0; border-radius:10px; border:1px solid rgba(0,0,0,.12); background:rgba(255,255,255,.94); color:var(--ink); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; -webkit-tap-highlight-color:transparent; }
-.chat-ask-bulk[hidden] { display:none; }
-.chat-ask-bulk:active { opacity:.75; }
 .chat-ask-input {
 border:1px solid rgba(0,0,0,.12); border-radius:12px; padding:11px 14px;
 font-size:14px; font-family:inherit; outline:none; background:#fff; color:var(--ink);
@@ -2756,28 +2753,6 @@ cursor:pointer;
 .msg-ask-q { font-size:14px; font-weight:700; color:var(--ink); line-height:1.5; }
 .msg-ask-tip { font-size:11px; color:var(--muted); margin-top:8px; }
 .msg-ask-a { font-size:12px; color:#3b7a4e; font-weight:600; margin-top:8px; }
-.msg-survey-card {
-max-width:78%; min-width:220px; text-align:center;
-background:#fff; border:1px solid rgba(0,0,0,.1);
-border-radius:16px; padding:14px 16px;
-box-shadow:0 2px 8px rgba(0,0,0,.05);
-cursor:pointer;
-}
-.msg-survey-head { font-size:14px; font-weight:700; color:var(--ink); line-height:1.5; }
-.msg-survey-list { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
-.msg-survey-item { font-size:13px; color:var(--ink); line-height:1.5; }
-.msg-survey-q { font-weight:600; word-break:break-word; }
-.msg-survey-opts { display:flex; flex-wrap:nowrap; justify-content:center; gap:6px; margin-top:6px; overflow-x:auto; }
-.msg-survey-opt {
-flex:0 0 auto; white-space:nowrap;
-padding:6px 12px; border:1px solid rgba(0,0,0,.12); border-radius:16px;
-background:#fff; color:var(--ink); font-size:12px;
-}
-.msg-survey-opt.sel { border-color:var(--ink); font-weight:700; }
-.msg-survey-a { font-size:12px; font-weight:600; color:#3b7a4e; margin-top:4px; word-break:break-word; }
-.msg-survey-tip { font-size:11px; color:var(--muted); margin-top:8px; display:flex; align-items:center; justify-content:center; gap:3px; }
-.msg-survey-chev { font-size:13px; line-height:1; opacity:.75; transform:translateY(-.5px); }
-.msg-survey-card:active { transform:translateY(1px); box-shadow:0 1px 3px rgba(0,0,0,.05); }
 .msg-choose-card {
 max-width:78%; min-width:220px; text-align:center;
 background:#fff; border:1px solid rgba(0,0,0,.1);
@@ -2796,8 +2771,7 @@ font-size:11px; font-weight:600;
 -webkit-tap-highlight-color:transparent;
 }
 .msg-ask-card.show-fav .msg-fav-heart,
-.msg-choose-card.show-fav .msg-fav-heart,
-.msg-survey-card.show-fav .msg-fav-heart {
+.msg-choose-card.show-fav .msg-fav-heart {
 display:inline-flex; animation:favFadeIn .18s ease;
 }
 @keyframes favFadeIn { from { opacity:0; transform:translateY(2px); } to { opacity:1; transform:none; } }
@@ -2808,8 +2782,7 @@ margin-top:4px; font-size:11px; color:#999; line-height:1.4;
 display:none; -webkit-tap-highlight-color:transparent;
 }
 .msg-ask-card.show-fav .msg-fav-time,
-.msg-choose-card.show-fav .msg-fav-time,
-.msg-survey-card.show-fav .msg-fav-time {
+.msg-choose-card.show-fav .msg-fav-time {
 display:block; animation:favFadeIn .18s ease;
 }
 .msg-voice {
@@ -8447,7 +8420,6 @@ html.tablet .tabbar .tab { padding:14px 8px; border-radius:16px; }
 [data-theme="dark"] .chat-ask-type-btn.sel { background:var(--ink); color:#111; border-color:var(--ink); }
 [data-theme="dark"] .chat-ask-opts { background:var(--dark-card); border-color:var(--dark-border-12); color:var(--ink); }
 [data-theme="dark"] .chat-ask-opts:focus { border-color:var(--ink); }
-[data-theme="dark"] .chat-ask-bulk { background:var(--dark-card); border-color:var(--dark-border-12); color:var(--ink); }
 [data-theme="dark"] .chat-ask-hist { border-bottom-color:rgba(255,255,255,.14); }
 [data-theme="dark"] .ih-day-btn { border-color:rgba(255,255,255,.09); background:rgba(255,255,255,.04); color:var(--ink); }
 [data-theme="dark"] .ih-day-btn:active { background:var(--dark-hover); }
@@ -8737,9 +8709,6 @@ color: var(--muted);
 [data-theme="dark"] .msg-inplace .ip-opt-chk.on .ip-opt-box::after { border-color:#111; }
 [data-theme="dark"] .msg-ask-card { background:var(--dark-card-92); border-color:var(--dark-border); }
 [data-theme="dark"] .msg-choose-card { background:var(--dark-card-92); border-color:var(--dark-border); }
-[data-theme="dark"] .msg-survey-card { background:var(--dark-card-92); border-color:var(--dark-border); }
-[data-theme="dark"] .msg-survey-opt { background:var(--dark-card); border-color:var(--dark-border-12); color:var(--ink); }
-[data-theme="dark"] .msg-survey-opt.sel { border-color:var(--ink); }
 [data-theme="dark"] .call-minimize { background:var(--dark-card); border-color:var(--dark-border-12); color:var(--dark-soft); }
 [data-theme="dark"] .call-mini { background:var(--dark-card-92); border-color:var(--dark-border); }
 [data-theme="dark"] .msg-poke-seg { background:var(--dark-card); border-color:var(--dark-border-12); }
@@ -11758,17 +11727,13 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
       让TA现在问一次
     </button>
-    <button class="div-draw" id="ta-ask-survey-open" style="margin-top:10px">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L20 6"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-      设置批量提问问卷
-    </button>
     <div class="set-group glass">
       <div class="gs-row"><span>TA 偶尔向你提问</span><label class="toggle"><input type="checkbox" id="ta-ask-enable"><span class="tk"></span></label></div>
       <div class="gs-row"><span>使用系统预设问题</span><label class="toggle"><input type="checkbox" id="ta-ask-default" checked><span class="tk"></span></label></div>
       <div class="gs-row"><span>回应接聊天字卡/词典（文字+单选）</span><label class="toggle"><input type="checkbox" id="ta-ask-chatcard"><span class="tk"></span></label></div>
       <div class="gs-row"><span>触发概率</span><input type="range" id="ta-ask-prob" min="1" max="100" step="1" class="tc-range"><span class="tc-prob-val" id="ta-ask-prob-val">5%</span></div>
       <div class="gs-row"><span>自动弹窗概率</span><input type="range" id="ta-ask-popup" min="0" max="100" step="1" class="tc-range"><span class="tc-prob-val" id="ta-ask-popup-val">70%</span></div>
-      <div class="gs-row" style="cursor:pointer"><span>问卷答题结束时间</span><button type="button" id="ta-ask-deadline" class="tc-input deadline-btn" style="flex:1;min-width:0;max-width:170px;padding:5px 8px;font-size:12px">未设置</button><button type="button" id="ta-ask-deadline-clear" style="flex:none;margin-left:6px;padding:4px 10px;font-size:12px;border:1px solid var(--line,#e5e5e5);border-radius:8px;background:transparent;color:var(--muted,#999)">清除</button></div>
+      <div class="gs-row" style="cursor:pointer"><span>提问结束时间</span><button type="button" id="ta-ask-deadline" class="tc-input deadline-btn" style="flex:1;min-width:0;max-width:170px;padding:5px 8px;font-size:12px">未设置</button><button type="button" id="ta-ask-deadline-clear" style="flex:none;margin-left:6px;padding:4px 10px;font-size:12px;border:1px solid var(--line,#e5e5e5);border-radius:8px;background:transparent;color:var(--muted,#999)">清除</button></div>
     </div>
     <div class="card-tabs" id="ta-ask-tabs" style="padding:6px 12px 8px">
       <button class="cc-tab sel" data-tab="sys">系统预设</button>
@@ -11797,35 +11762,6 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
       <div id="ta-ask-mine-cats"></div>
     </div>
     <div class="dc-credit">单选题、多选题功能参考：小红书 @FelixFelicis（9416318007）的「帮我决定」「多人决定」</div>
-  </div>
-</div>
-
-<!-- 批量提问问卷（独立页面：用户批量出题 · 联系人作答交卷） -->
-<div class="page" id="page-ta-ask-survey" hidden>
-  <div class="chat-head">
-    <span class="ch-back" id="ta-survey-back">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-    </span>
-    <span class="ch-name">批量提问问卷</span>
-  </div>
-  <div class="gs-scroll">
-    <div class="set-group glass" style="padding:14px">
-      <div class="cal-card-title" style="padding:0 0 8px">问卷题目（批量设置）</div>
-      <div class="dec-inp-wrap" style="flex:1 0 100%"><textarea id="ta-survey-text" class="tc-input" rows="12" placeholder="单选题：第一行【问题】，下面每行一个选项，如：&#10;【今晚想吃什么？】&#10;火锅&#10;烧烤&#10;寿司&#10;&#10;多选题：题干里写「（多选）」，也可写「（多选·最多2）」给这一题单独限个数，下面每行一个选项，如：&#10;【今晚想吃点什么？（多选·最多2）】&#10;火锅&#10;烧烤&#10;寿司&#10;&#10;文字题：第一行【问题】，下一行只写一个「一」，如：&#10;【今天过得怎么样？】&#10;一"></textarea><button type="button" class="dec-inp-clear" data-clear="ta-survey-text" aria-label="清空" title="清空">✕</button></div>
-      <div style="font-size:12px;color:var(--muted,#999);padding-top:8px;line-height:1.8">· 单选题：【问题】后每行一个选项（至少 2 个）<br>· 多选题：题干末尾写「（多选）」（【问题（多选）】），TA 一次答好几个，几个之间用「、」连着念；这几种题的「最多选几个」在下面那根杆子上调，个别题想另限就写成「（多选·最多2）」（2~6 有效，写了它这题按题上的数算、不看杆）<br>· 文字题：【问题】后一行只写「一」，TA 会用字卡作答（和正常聊天一样用自定义字卡 + 系统预设字卡；未成年人防护锁定系统预设字卡时，只用自定义字卡）<br>· 发出后 TA 开始作答：到交卷时间自动交卷，之前每 30 秒按「提前交卷概率」可能提前交卷<br>· 关闭「TA 的每条作答都发送到聊天消息」后，TA 只把答案写进聊天里的问卷卡片，不再把每题作答逐条发到聊天（单题默认会发，题多怕刷屏可关）</div>
-    </div>
-    <div class="set-group glass">
-      <div class="gs-row" style="cursor:pointer"><span>交卷时间（到点TA自动交卷）</span><button type="button" id="ta-survey-deadline" class="tc-input deadline-btn" style="flex:1;min-width:0;max-width:170px;padding:5px 8px;font-size:12px">未设置</button><button type="button" id="ta-survey-deadline-clear" style="flex:none;margin-left:6px;padding:4px 10px;font-size:12px;border:1px solid var(--line,#e5e5e5);border-radius:8px;background:transparent;color:var(--muted,#999)">清除</button></div>
-      <div class="gs-row"><span>每30秒提前交卷概率</span><input type="range" id="ta-survey-prob" min="0" max="100" step="1" class="tc-range"><span class="tc-prob-val" id="ta-survey-prob-val">10%</span></div>
-      <div class="gs-row"><span>多选题最多选几个</span><div class="stepper" id="ta-survey-mmax" data-min="2" data-max="6" data-step="1"><button type="button" class="stp-min">−</button><input class="stp-val" id="ta-survey-mmax-val" readonly><button type="button" class="stp-max">+</button></div></div>
-      <div class="gs-row"><span>TA 的每条作答都发送到聊天消息</span><label class="toggle"><input type="checkbox" id="ta-survey-chat" checked><span class="tk"></span></label></div>
-    </div>
-    <div class="set-group glass" style="padding:12px 14px">
-      <div id="ta-survey-status" style="font-size:13px;line-height:1.8">尚未发出问卷</div>
-    </div>
-    <button class="ta-add-btn" style="width:100%" id="ta-survey-send">发出问卷给TA</button>
-    <button class="ta-add-btn" style="width:100%;margin-top:10px" id="ta-survey-reset">撤回问卷（重置为草稿）</button>
-    <div style="height:16px"></div>
   </div>
 </div>
 
@@ -16944,7 +16880,6 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
           </div>
           <div class="invite-list" id="invite-list" hidden></div>
           <div class="dec-inp-wrap chat-ask-inp-wrap"><input type="text" class="chat-ask-input" id="chat-ask-input" placeholder="想邀请TA做什么？" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button type="button" class="dec-inp-clear" data-clear="chat-ask-input" aria-label="清空" title="清空">✕</button></div>
-          <button type="button" class="chat-ask-bulk" id="chat-ask-bulk" hidden>批量设置问卷</button>
           <div class="chat-ask-actions">
             <button class="cc-tool" id="chat-ask-save" hidden>存入</button>
             <button class="cc-tool" id="chat-ask-cancel">取消</button>
@@ -18140,7 +18075,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
   // v3.5.123：readonly 起手（防 Chrome 密码弹条破坏表单签名）——这里立即解除，
   // 早于所有功能模块，任何设备都不会出现输入框不可用的情况
   (function () { var _ci = document.getElementById('chat-input'); if (_ci) _ci.readOnly = false; })();
-window.__jsErrors = window.__jsErrors || []; window.__mochiLoaded = window.__mochiLoaded || []; window.__mochiErrLoaded = window.__mochiErrLoaded || []; window.__mochiBootAt = Date.now(); window.__mochiJsFiles = ["device.js","idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","entry-quiz.js","entry-rules.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","fav-reason-data.js","fav-reason.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","pwa.js","update-remind.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"]; window.__mochiExtFiles = ["idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","entry-quiz.js","entry-rules.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","fav-reason-data.js","fav-reason.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","update-remind.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"];
+window.__jsErrors = window.__jsErrors || []; window.__mochiLoaded = window.__mochiLoaded || []; window.__mochiErrLoaded = window.__mochiErrLoaded || []; window.__mochiBootAt = Date.now(); window.__mochiJsFiles = ["device.js","idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","entry-rules.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","fav-reason-data.js","fav-reason.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","pwa.js","update-remind.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"]; window.__mochiExtFiles = ["idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","entry-rules.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","fav-reason-data.js","fav-reason.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","update-remind.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"];
 (function () { try {
 (function () {
 try { window.__jsErrors = window.__jsErrors || []; } catch (e0) {}
@@ -22874,7 +22809,6 @@ window.__mochiBootRetry = function () { try { location.reload(); } catch (e) {} 
 <script defer src="js/img-compress.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('img-compress.js')"></script>
 <script defer src="js/img-ingest.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('img-ingest.js')"></script>
 <script defer src="js/clock.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('clock.js')"></script>
-<script defer src="js/entry-quiz.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('entry-quiz.js')"></script>
 <script defer src="js/entry-rules.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('entry-rules.js')"></script>
 <script defer src="js/tabs.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('tabs.js')"></script>
 <script defer src="js/desktop-slider.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('desktop-slider.js')"></script>

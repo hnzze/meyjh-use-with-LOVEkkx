@@ -947,7 +947,7 @@ const f = r.curiousQuick.map(o => ICON_CQ_FIX[o] || o);
 if (f.some((o, i) => o !== r.curiousQuick[i])) { r.curiousQuick = f; c = true; }
 }
 if (r.special === 'ask-curious' && typeof r.curiousAnswer === 'string' && ICON_CQ_FIX[r.curiousAnswer]) { r.curiousAnswer = ICON_CQ_FIX[r.curiousAnswer]; c = true; }
-if (!r.ts) { r.ts = (r.rpTs || r.askTs || r.surveyTs || r.dAt) || Date.now(); c = true; }
+if (!r.ts) { r.ts = (r.rpTs || r.askTs || r.dAt) || Date.now(); c = true; }
 } catch (e) {}
 return c;
 }
@@ -3038,8 +3038,8 @@ body.addEventListener('pointerup', rpClearPress);
 body.addEventListener('pointerleave', rpClearPress);
 body.addEventListener('pointercancel', rpClearPress);
 body.addEventListener('click', (e) => {
-if (!e.target.closest('.msg-ask-card, .msg-choose-card, .msg-survey-card, .msg-fav-heart, .msg-inplace')) {
-body.querySelectorAll('.msg-ask-card.show-fav, .msg-choose-card.show-fav, .msg-survey-card.show-fav').forEach(c => c.classList.remove('show-fav'));
+if (!e.target.closest('.msg-ask-card, .msg-choose-card, .msg-fav-heart, .msg-inplace')) {
+body.querySelectorAll('.msg-ask-card.show-fav, .msg-choose-card.show-fav').forEach(c => c.classList.remove('show-fav'));
 }
 const favBtn = e.target.closest('.msg-fav-heart');
 if (favBtn) {
@@ -3106,19 +3106,7 @@ setTimeout(() => rpCollectFeedback('in'), randInt(1100, 2200));
 return;
 }
 if (e.target.closest('.msg-inplace')) return;
-const surveyCard = e.target.closest('.msg-survey-card');
-if (surveyCard) {
-e.stopPropagation(); // 不冒泡触发气泡操作菜单
-const sHadFav = surveyCard.classList.contains('show-fav');
-body.querySelectorAll('.msg-ask-card.show-fav, .msg-choose-card.show-fav, .msg-survey-card.show-fav').forEach(c => c.classList.remove('show-fav'));
-if (!sHadFav) surveyCard.classList.add('show-fav');
-const sItem = surveyCard.closest('.msg-survey');
-const sIdx = sItem && sItem.dataset.idx !== undefined ? Number(sItem.dataset.idx) : -1;
-const sRec = sIdx >= 0 ? msgs[sIdx] : null;
-if (window.openSurveyDetail && sRec) window.openSurveyDetail(sRec);
-else if (window.openAskSurvey) window.openAskSurvey();
-return;
-}
+
 const card = e.target.closest('.msg-ask-card, .msg-choose-card');
 if (!card) return;
 const item = card.closest('.msg-ask');
@@ -4209,7 +4197,7 @@ im.replaceWith(ph);
 });
 }
 function msgRecTsOf(rec) {
-return (rec && (rec.ts || rec.rpTs || rec.askTs || rec.surveyTs || rec.dAt)) || 0;
+return (rec && (rec.ts || rec.rpTs || rec.askTs || rec.dAt)) || 0;
 }
 function msgKeyOf(rec) {
 if (!rec) return '';
@@ -4236,43 +4224,7 @@ if (j >= 0) { item.dataset.idx = String(j); return { rec: msgs[j], idx: j }; }
 if (okFast) return { rec: rec, idx: _i };
 return rec ? { rec: rec, idx: _i } : null;
 }
-function surveyCardHtml(rec) {
-const qs = Array.isArray(rec.surveyQs) ? rec.surveyQs : [];
-const answers = Array.isArray(rec.surveyAnswers) ? rec.surveyAnswers : [];
-const done = rec.surveyStatus === 'done';
-const nDone = answers.filter(a => typeof a === 'string' && a.trim()).length;
-let rows = '';
-qs.forEach((q, i) => {
-const a = answers[i] || '';
-rows += '<div class="msg-survey-item' + (a ? ' answered' : '') + '">' +
-'<div class="msg-survey-q">' + (i + 1) + '. ' + escTxt(q.text || '') + '</div>' +
-(Array.isArray(q.options) && q.options.length
-? '<div class="msg-survey-opts">' + q.options.map(o => '<span class="msg-survey-opt' + (window.mochiAnswerHits && window.mochiAnswerHits(o, a) ? ' sel' : '') + '">' + escTxt(o) + '</span>').join('') + '</div>'
-: '') +
-(a ? '<div class="msg-survey-a">' + (window.taFit ? window.taFit('TA：') : 'TA：') + escTxt(window.taFit ? window.taFit(a) : a) + '</div>' : '') +
-'</div>';
-});
-return '<div class="msg-survey-card' + (done ? ' done' : '') + '">' +
-'<div class="msg-survey-head">你发出的问卷 · ' + qs.length + ' 题</div>' +
-'<div class="msg-survey-list">' + (rows || '<div class="msg-survey-item">（问卷内容缺失）</div>') + '</div>' +
-'<div class="msg-survey-tip">' + (done ? '已交卷 · 点击查看问卷详情' : 'TA 正在作答 · 已答 ' + nDone + '/' + qs.length + '，点击查看进度') + '<span class="msg-survey-chev">\u203A</span></div>' +
-favHeartHtml(rec) +
-'</div>';
-}
-window.chatSyncSurveyCard = function (surveyTs, status, answers) {
-if (!surveyTs) return;
-for (let i = msgs.length - 1; i >= 0; i--) {
-const r = msgs[i];
-if (r && r.special === 'ask-survey' && r.surveyTs === surveyTs) {
-r.surveyStatus = status;
-r.surveyAnswers = Array.isArray(answers) ? answers : [];
-saveMsgs();
-const el = body.querySelector('.msg-survey[data-idx="' + i + '"]');
-if (el) el.innerHTML = surveyCardHtml(r);
-return;
-}
-}
-};
+
 const GAME_CHAT_CARDS = {
 gomoku: { icon: '⚫', name: '五子棋' },
 c4: { icon: '🔵', name: '四子棋' },
@@ -4628,14 +4580,7 @@ appendMsg(m);
 maybeScrollChatBottom(rec.side);
 return m;
 }
-if (rec.special === 'ask-survey') {
-m.className = 'msg-ask msg-survey';
-m.dataset.idx = __msgAt; // #1326：分支重写读调用方给的这一格
-m.innerHTML = surveyCardHtml(rec);
-appendMsg(m);
-maybeScrollChatBottom(rec.side);
-return m;
-}
+
 if (rec.special === 'ask-card') {
 m.className = 'msg-ask';
 m.dataset.idx = __msgAt; // #1326：分支重写读调用方给的这一格
@@ -5214,7 +5159,7 @@ if (window.nightModeActive && window.nightModeActive()) window.__nightReplyOpen 
 }
 const PENDING_CARD_STATUS_FIELD = {
 'ask-card': 'askStatus', ask: 'askStatus', 'ask-choose': 'choiceStatus', 'ask-curious': 'curiousStatus',
-'ask-roast': 'roastStatus', invite: 'inviteStatus', survey: 'surveyStatus', redpacket: 'rpStatus'
+'ask-roast': 'roastStatus', invite: 'inviteStatus', redpacket: 'rpStatus'
 };
 const PENDING_CARD_SETTLED = { answered: 1, done: 1, received: 1, expired: 1, returned: 1 };
 function isPendingCardRec(rec) {
@@ -5349,7 +5294,7 @@ try { window.playSfx('in'); } catch (e) {}
 const _tagMood = opts.tag ? [{ tag: String(opts.tag), label: opts.tagNoDup ? '' : String(text) }] : null;
 const _tagExtra = Array.isArray(opts.tagExtra) ? opts.tagExtra.filter(md => md && String(md.tag || '').trim()).map(md => ({ tag: String(md.tag), label: md.label == null ? '' : String(md.label) })) : null;
 const _tagMerged = (_tagExtra && _tagExtra.length) ? (_tagMood ? _tagMood.concat(_tagExtra) : _tagExtra) : _tagMood;
-return addRec({ side: 'in', text: text, initiative: opts.initiative, special: opts.special, rateAllow: opts.rateAllow, game: opts.game, quote: opts.quote, qidx: opts.qidx, type: opts.type, img: opts.img, parts: opts.parts, mailNotice: opts.mailNotice, gInv: opts.gInv, silent: opts.silent, nightAllow: opts.nightAllow, askQuestion: opts.askQuestion, askStatus: opts.askStatus, askOptions: opts.askOptions, askType: opts.askType, choiceQuestion: opts.choiceQuestion, choiceOptions: opts.choiceOptions, choicePref: opts.choicePref, choiceCat: opts.choiceCat, choiceStatus: opts.choiceStatus, choiceAnswer: opts.choiceAnswer, choiceReply: opts.choiceReply, choiceMatch: opts.choiceMatch, curiousQuestion: opts.curiousQuestion, curiousQuick: opts.curiousQuick, curiousReplies: opts.curiousReplies, curiousFollowup: opts.curiousFollowup, curiousQid: opts.curiousQid, curiousCat: opts.curiousCat, curiousStatus: opts.curiousStatus, curiousAnswer: opts.curiousAnswer, curiousReply: opts.curiousReply, roastText: opts.roastText, roastCat: opts.roastCat, roastStatus: opts.roastStatus, roastAnswer: opts.roastAnswer, roastReply: opts.roastReply, rpAmount: opts.rpAmount, rpWish: opts.rpWish, rpStatus: opts.rpStatus, rpTs: opts.rpTs, rpCover: opts.rpCover, askFen: opts.askFen, askTs: opts.askTs, deskCk: opts.deskCk, deskCkDir: opts.deskCkDir, surveyTs: opts.surveyTs, surveyQs: opts.surveyQs, surveyStatus: opts.surveyStatus, surveyAnswers: opts.surveyAnswers, dedupExempt: opts.dedupExempt, nickKeep: opts.nickKeep, mood: opts.mood || _tagMerged || undefined });
+return addRec({ side: 'in', text: text, initiative: opts.initiative, special: opts.special, rateAllow: opts.rateAllow, game: opts.game, quote: opts.quote, qidx: opts.qidx, type: opts.type, img: opts.img, parts: opts.parts, mailNotice: opts.mailNotice, gInv: opts.gInv, silent: opts.silent, nightAllow: opts.nightAllow, askQuestion: opts.askQuestion, askStatus: opts.askStatus, askOptions: opts.askOptions, askType: opts.askType, choiceQuestion: opts.choiceQuestion, choiceOptions: opts.choiceOptions, choicePref: opts.choicePref, choiceCat: opts.choiceCat, choiceStatus: opts.choiceStatus, choiceAnswer: opts.choiceAnswer, choiceReply: opts.choiceReply, choiceMatch: opts.choiceMatch, curiousQuestion: opts.curiousQuestion, curiousQuick: opts.curiousQuick, curiousReplies: opts.curiousReplies, curiousFollowup: opts.curiousFollowup, curiousQid: opts.curiousQid, curiousCat: opts.curiousCat, curiousStatus: opts.curiousStatus, curiousAnswer: opts.curiousAnswer, curiousReply: opts.curiousReply, roastText: opts.roastText, roastCat: opts.roastCat, roastStatus: opts.roastStatus, roastAnswer: opts.roastAnswer, roastReply: opts.roastReply, rpAmount: opts.rpAmount, rpWish: opts.rpWish, rpStatus: opts.rpStatus, rpTs: opts.rpTs, rpCover: opts.rpCover, askFen: opts.askFen, askTs: opts.askTs, deskCk: opts.deskCk, deskCkDir: opts.deskCkDir, dedupExempt: opts.dedupExempt, nickKeep: opts.nickKeep, mood: opts.mood || _tagMerged || undefined });
 }
 function addInTyped(items, opts, firstDelay) {
 try {
@@ -5410,7 +5355,7 @@ window.chatAddSystem = function (text, opts) {
 opts = opts || {};
 opts.nightAllow = opts.nightAllow === true;
 opts.rateAllow = opts.rateAllow === true; // #1341：限流的豁免位同要经本白名单透传
-return addIn(text, { special: opts.special || 'poke', silent: opts.silent, nightAllow: opts.nightAllow, rateAllow: opts.rateAllow, img: opts.img, mailNotice: opts.mailNotice, nickKeep: opts.nickKeep, game: opts.game, askQuestion: opts.askQuestion, askStatus: opts.askStatus, askOptions: opts.askOptions, askType: opts.askType, askTs: opts.askTs, choiceQuestion: opts.choiceQuestion, choiceOptions: opts.choiceOptions, choicePref: opts.choicePref, choiceCat: opts.choiceCat, choiceStatus: opts.choiceStatus, choiceAnswer: opts.choiceAnswer, choiceReply: opts.choiceReply, choiceMatch: opts.choiceMatch, curiousQuestion: opts.curiousQuestion, curiousQuick: opts.curiousQuick, curiousReplies: opts.curiousReplies, curiousFollowup: opts.curiousFollowup, curiousQid: opts.curiousQid, curiousCat: opts.curiousCat, curiousStatus: opts.curiousStatus, curiousAnswer: opts.curiousAnswer, curiousReply: opts.curiousReply, roastText: opts.roastText, roastCat: opts.roastCat, roastStatus: opts.roastStatus, roastAnswer: opts.roastAnswer, roastReply: opts.roastReply, rpAmount: opts.rpAmount, rpWish: opts.rpWish, rpStatus: opts.rpStatus, rpTs: opts.rpTs, rpCover: opts.rpCover, askFen: opts.askFen, askTs: opts.askTs, deskCk: opts.deskCk, deskCkDir: opts.deskCkDir, surveyTs: opts.surveyTs, surveyQs: opts.surveyQs, surveyStatus: opts.surveyStatus, surveyAnswers: opts.surveyAnswers });
+return addIn(text, { special: opts.special || 'poke', silent: opts.silent, nightAllow: opts.nightAllow, rateAllow: opts.rateAllow, img: opts.img, mailNotice: opts.mailNotice, nickKeep: opts.nickKeep, game: opts.game, askQuestion: opts.askQuestion, askStatus: opts.askStatus, askOptions: opts.askOptions, askType: opts.askType, askTs: opts.askTs, choiceQuestion: opts.choiceQuestion, choiceOptions: opts.choiceOptions, choicePref: opts.choicePref, choiceCat: opts.choiceCat, choiceStatus: opts.choiceStatus, choiceAnswer: opts.choiceAnswer, choiceReply: opts.choiceReply, choiceMatch: opts.choiceMatch, curiousQuestion: opts.curiousQuestion, curiousQuick: opts.curiousQuick, curiousReplies: opts.curiousReplies, curiousFollowup: opts.curiousFollowup, curiousQid: opts.curiousQid, curiousCat: opts.curiousCat, curiousStatus: opts.curiousStatus, curiousAnswer: opts.curiousAnswer, curiousReply: opts.curiousReply, roastText: opts.roastText, roastCat: opts.roastCat, roastStatus: opts.roastStatus, roastAnswer: opts.roastAnswer, roastReply: opts.roastReply, rpAmount: opts.rpAmount, rpWish: opts.rpWish, rpStatus: opts.rpStatus, rpTs: opts.rpTs, rpCover: opts.rpCover, askFen: opts.askFen, askTs: opts.askTs, deskCk: opts.deskCk, deskCkDir: opts.deskCkDir });
 };
 window.chatAddIn = function (text, opts) {
 if (opts && opts.follow) chatUserFollowScroll = true;
@@ -9006,8 +8951,6 @@ const isInvite = chatAskMode === 'invite';
 if (invGroups) invGroups.hidden = !isInvite;
 if (invList) invList.hidden = !isInvite;
 if (invSave) invSave.hidden = !isInvite;
-const bulkBtn = document.getElementById('chat-ask-bulk');
-if (bulkBtn) bulkBtn.hidden = isInvite;
 const invHist = document.getElementById('chat-ask-hist');
 if (invHist) invHist.hidden = !isInvite;
 if (isInvite) {
@@ -9696,13 +9639,7 @@ close();
 ['chat-rp-panel', () => closeRpPanel()]].forEach((s) => {
 window.mochiSheetOutsideClose(document.getElementById(s[0]), s[1]);
 });
-const chatAskBulkBtn = document.getElementById('chat-ask-bulk');
-if (chatAskBulkBtn) chatAskBulkBtn.addEventListener('click', (e) => {
-if (e) e.stopPropagation();
-closeChatAskPanel();
-if (window.openAskSurvey) window.openAskSurvey();
-else toast('批量问卷加载失败');
-});
+
 const chatAskClearBtn = document.querySelector('#chat-ask-panel .dec-inp-clear[data-clear="chat-ask-input"]');
 if (chatAskClearBtn) chatAskClearBtn.addEventListener('click', (e) => {
 if (e) e.stopPropagation();
@@ -10397,19 +10334,7 @@ else if (special === 'flower') { q = (rec.flName || '花') + (rec.flWish ? '：'
 else if (special === 'gift') { q = (rec.giftName || '礼物') + (rec.giftWish ? '：“' + rec.giftWish + '”' : '') + (rec.giftPrice != null ? ' · ¥' + Number(rec.giftPrice || 0).toFixed(2) : ''); }
 else if (special === 'dish') { q = (rec.dishName || '菜肴') + (rec.dishWish ? '：“' + rec.dishWish + '”' : '') + (rec.dishPrice != null ? ' · ¥' + Number(rec.dishPrice || 0).toFixed(2) : ''); }
 else if (special === 'wish') { q = (rec.wishGiftName || '礼物') + '（' + chatPartnerName() + '的心愿）' + (rec.wishGiftPrice != null ? ' · ¥' + Number(rec.wishGiftPrice || 0).toFixed(2) : ''); }
-else if (special === 'ask-survey') {
-const sqs = Array.isArray(rec.surveyQs) ? rec.surveyQs : [];
-const sans = Array.isArray(rec.surveyAnswers) ? rec.surveyAnswers : [];
-const qarr = sqs.slice(0, 99).map(sq => {
-const it = { t: String((sq && sq.text) || '').slice(0, 120) };
-if (sq && Array.isArray(sq.options) && sq.options.length) it.o = sq.options.slice(0, 12).map(o => String(o).slice(0, 60));
-return it;
-});
-q = '问卷 · ' + sqs.length + ' 题' + (qarr.length && qarr[0].t ? '：' + qarr[0].t : '');
-return { kind: 'card', special: special, q: q, mine: '', ta: '', ts: rec.ts || Date.now(),
-qarr: qarr, aarr: sans.slice(0, 99).map(a => String(a || '').slice(0, 300)),
-mtext: String(rec.text || '').slice(0, 120) };
-}
+
 else return null;
 return { kind: 'card', special: special, q: q, mine: mine, ta: ta, ts: rec.ts || Date.now(),
 mtext: String(rec.text || '').slice(0, 120) };
@@ -11145,7 +11070,7 @@ return;
 }
 const FAV_KIND_LABEL = {
 'ask-choose': '小问题', 'ask-curious': '好奇', 'ask-roast': '吐槽',
-'ask-card': '问问TA', 'invite': '邀请TA', 'ask': '问问TA', 'ask-survey': '问卷',
+'ask-card': '问问TA', 'invite': '邀请TA', 'ask': '问问TA',
 'redpacket': '红包', 'flower': '送花', 'gift': '礼物', 'dish': '佳肴'
 };
 function favTextHtml(s) {
@@ -11173,19 +11098,9 @@ const label = FAV_KIND_LABEL[f.special] || '互动卡片';
 let html = '<div class="fav-item-card">' +
 '<span class="fav-item-tag">互动卡片 · ' + label + '</span>' +
 '<div class="fav-item-q">' + (f.special === 'invite' ? (window.taFit ? window.taFit('邀请TA') : '邀请TA') + ' · ' : '') + escTxt(f.q || '') + '</div>';
-if (f.special === 'ask-survey' && Array.isArray(f.qarr) && f.qarr.length) {
-const aarr = Array.isArray(f.aarr) ? f.aarr : [];
-html += '<div style="text-align:left;display:flex;flex-direction:column;gap:8px;margin-top:2px">' + f.qarr.map((x, i) => {
-let r = '<div><div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.5;word-break:break-word">' + (i + 1) + '. ' + escTxt((x && x.t) || '') + '</div>';
-if (x && Array.isArray(x.o) && x.o.length) r += '<div style="font-size:11px;color:var(--muted);margin-top:2px;word-break:break-word">选项：' + escTxt(x.o.join(' / ')) + '</div>';
-if (aarr[i]) r += '<div class="fav-item-a" style="margin-top:2px;word-break:break-word">TA：' + escTxt(aarr[i]) + '</div>';
-return r + '</div>';
-}).join('') + '</div>';
-} else {
 if (f.mine) html += '<div class="fav-item-a">✓ 我：' + escTxt(f.mine) + '</div>';
 if (f.ta) html += '<div class="fav-item-r">' + (window.taFit ? window.taFit('TA：') : 'TA：') + escTxt(window.taFit ? window.taFit(askCardReplyClean(f.ta)) : askCardReplyClean(f.ta)) + '</div>'; // #648g 存量收藏快照的媒体卡回应同样清洗
 if (!f.mine && !f.ta) html += '<div class="fav-item-tip">等待回应…</div>';
-}
 html += '</div>';
 m.innerHTML = html + side;
 fillAvatar(m.querySelector('.msg-av'), 'cs-avatar-user');

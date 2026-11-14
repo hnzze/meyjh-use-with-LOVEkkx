@@ -1,11 +1,10 @@
 (function () { try {
 /* ===== 功能：入站须知（开屏公告前的一次性入站确认层 · 答对全部题并接受规则才能看公告） =====
-归属：开屏/入口验证（AI-B 域）。build.mjs jsFiles 插在 entry-quiz.js 之后加载。
+归属：开屏/入口验证（AI-B 域）。build.mjs jsFiles 插在 clock.js 之后加载。
 触发：模块加载即判定——开屏（#splash）在场且本机未通过时，立即在 .splash 内盖上整页
-须知（.eqz-active 收起 .splash-box/.splash-footcard，同 entry-quiz 的同层方案）；
-通过后移除本层，开屏公告照常出现。clock.js 的进入流程（含 #1550 的 24 题入站
-问卷闸 mochiEntryQuizGate）一字未动，两道闸完全独立。
-页面：作为 .splash 容器内的整页子节点（复用 entry-quiz.css 的 .eqz-* 样式，零新 CSS），
+须知（.eqz-active 收起 .splash-box/.splash-footcard，与开屏同层方案）；
+通过后移除本层，开屏公告照常出现。clock.js 的进入流程一字未动。
+页面：作为 .splash 容器内的整页子节点（复用 .eqz-* 样式，零新 CSS），
 与开屏同层（.splash 的 z-index 999），不新建遮罩、不改任何图层/z-index。
 没有返回/关闭入口：不接受须知＝无法查看公告（想离开直接关掉页面）。
 数据：全局根键 xy-home-v2:rules-notice-pass（存 {t:时间戳, v:须知版本}；已进 contacts.js EXCLUDE）。
@@ -240,14 +239,6 @@ boxInfo('#nrz-scroll'),
 '置底尝试: ' + probe,
 '记录: LS=' + (function () { try { return localStorage.getItem(G + ':' + K_PASS) || '空'; } catch (e7) { return '读失败'; } })() +
 ' | cookie=' + (ckRaw() || '空'),
-'24题记录: ' + (function () {
-try {
-var q = (window.mochiEntryQuizPassed && window.mochiEntryQuizPassed()) ? '已通过' : '未通过(或闸未加载)';
-var raw = localStorage.getItem(G + ':entry-quiz-pass') || '空';
-var qc = (window.__mochiQuizCk ? window.__mochiQuizCk() : null) || '空';
-return q + ' | LS=' + raw + ' | cookie=' + qc;
-} catch (e12) { return '读失败'; }
-})(),
 'LS可写: ' + (function () {
 try {
 const k = G + ':__rnp-wt';

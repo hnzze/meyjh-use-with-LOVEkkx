@@ -761,7 +761,7 @@ return null;
 }
 window.openAskReply = function (msgIdx) {
 if (!window.openModal) return;
-if (askDeadlinePassed(taAskLoad())) { toast('已过问卷答题结束时间，不能再作答'); return; }
+if (askDeadlinePassed(taAskLoad())) { toast('已过提问结束时间，不能再作答'); return; }
 msgIdx = locateCardIdx(msgIdx, 'ask-card', 'askStatus');
 if (msgIdx < 0) return;
 let question = '';
@@ -800,7 +800,7 @@ const _fixedIdx = locateCardIdx(msgIdx, 'ask-card', 'askStatus');
 if (_fixedIdx >= 0) { msgIdx = _fixedIdx; rec = getCardAt(_fixedIdx); }
 }
 if (rec && rec.deskCk) return _origChatAskReply.call(this, msgIdx, answer, reply, opts);
-if (askDeadlinePassed(taAskLoad())) { toast('已过问卷答题结束时间，不能再作答'); return undefined; }
+if (askDeadlinePassed(taAskLoad())) { toast('已过提问结束时间，不能再作答'); return undefined; }
 const askTs = rec && rec.askTs ? rec.askTs : null;
 const question = rec ? (rec.askQuestion || rec.text || '') : '';
 const result = _origChatAskReply.call(this, msgIdx, answer, reply, opts);
@@ -827,7 +827,7 @@ const page = document.getElementById('page-ta-ask');
 if (!page) return;
 window.triggerTaAskNow = function () {
 const d = taAskLoad();
-if (askDeadlinePassed(d)) { toast('已过问卷答题结束时间，不再发出询问'); return; }
+if (askDeadlinePassed(d)) { toast('已过提问结束时间，不再发出询问'); return; }
 const q = taAskPick(d);
 if (!q) { toast('题库没有启用的问题'); return; }
 const s = d.settings || { enabled: true, prob: 5, popupProb: 70 };
@@ -904,7 +904,7 @@ const askDeadlineEl = document.getElementById('ta-ask-deadline');
 const askDeadlineRow = askDeadlineEl ? askDeadlineEl.closest('.gs-row') : null;
 if (askDeadlineRow) askDeadlineRow.addEventListener('click', (e) => {
 if (e.target.closest('#ta-ask-deadline-clear')) return;
-openDeadlinePicker('问卷答题结束时间', askDeadlineMs(taAskLoad()), (ts) => {
+openDeadlinePicker('提问结束时间', askDeadlineMs(taAskLoad()), (ts) => {
 const d = taAskLoad();
 d.settings.deadline = ts > 0 ? ts : 0;
 taAskSave(d);
@@ -3567,26 +3567,7 @@ attachIdbRestore(KEY, taAskLoad, taAskMerge);
 attachIdbRestore(KEY2, tcLoad, tcMerge);
 attachIdbRestore(KEY3, tcuLoad, tcuMerge);
 attachIdbRestore(KEY4, trLoad, trMerge);
-const SKEY = 'ta-survey';
-function surveyLoad() {
-let d = null;
-try { d = JSON.parse(store.get(SKEY) || 'null'); } catch (e) { d = null; }
-if (!d || typeof d !== 'object' || Array.isArray(d)) d = {};
-if (typeof d.text !== 'string') d.text = '';
-if (!d.settings || typeof d.settings !== 'object') d.settings = { prob: 10, deadline: 0, sendToChat: true };
-if (typeof d.settings.prob !== 'number') d.settings.prob = 10;
-if (typeof d.settings.deadline !== 'number') d.settings.deadline = 0;
-if (typeof d.settings.sendToChat !== 'boolean') d.settings.sendToChat = true;
-if (!Array.isArray(d.qs)) d.qs = [];
-if (!Array.isArray(d.answers)) d.answers = [];
-if (d.status !== 'sent' && d.status !== 'done') { d.status = 'draft'; d.sentAt = 0; }
-if (typeof d.doneMsgAt !== 'number') d.doneMsgAt = 0;
-return d;
-}
-function surveySave(d) { try { store.set(SKEY, JSON.stringify(d)); } catch (e) {} }
-function surveySyncCard(d) {
-try { if (window.chatSyncSurveyCard) window.chatSyncSurveyCard(d.sentAt, d.status, d.answers.slice()); } catch (e) {}
-}
+
 function askMultiMarkOf(text) {
 const s = String(text == null ? '' : text).trim();
 const capOf = function (n) { const v = parseInt(n, 10); return (v >= 2 && v <= 6) ? v : 0; };
@@ -3596,384 +3577,7 @@ const bare = s.length > 2 ? s.match(/\s*多\s*选\s*(?:[·•:：]?\s*最\s*多\
 if (bare) return { text: s.slice(0, bare.index).trim(), multi: true, max: capOf(bare[1]) };
 return { text: s, multi: false, max: 0 };
 }
-function surveyParse(text) {
-const lines = String(text || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-const qs = [];
-let cur = null, marked = false;
-const flush = () => {
-if (!cur) return;
-if (!marked && cur.opts.length >= 2) {
-const sq = { type: cur.multi ? 'multi' : 'single', text: cur.text, options: cur.opts.slice() };
-if (cur.multi && cur.max >= 2) sq.multiMax = cur.max;
-qs.push(sq);
-}
-else qs.push({ type: 'text', text: cur.text, options: [] });
-cur = null; marked = false;
-};
-lines.forEach(t => {
-const m = t.match(/^【(.+?)】$/);
-if (m) {
-flush();
-const mk = askMultiMarkOf(m[1]);
-if (mk.text) cur = { text: mk.text, opts: [], multi: mk.multi, max: mk.max || 0 };
-return;
-}
-if (cur) {
-if (!marked && !cur.opts.length && t === '一') { marked = true; return; }
-cur.opts.push(t); return;
-}
-flush();
-qs.push({ type: 'text', text: t, options: [] }); // 无【】裸行：整行当文字题题干
-});
-flush();
-return qs.filter(q => q.text);
-}
-function surveyAnswerText() {
-let t = '';
-let words = [];
-try {
-const cards = (window.getCustomCards && window.getCustomCards()) || [];
-words = cards.filter(s => typeof s === 'string' && s.trim() && s.indexOf('data:') !== 0 && s.indexOf('|||') < 0 && !/^https?:\/\//i.test(s) && !(window.mochiMediaIsToken && window.mochiMediaIsToken(s)));
-} catch (e) {}
-if (words.length) {
-const n = 1 + Math.floor(Math.random() * Math.min(5, words.length));
-const copy = words.slice(); const out = [];
-while (out.length < n) out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);
-t = (window.pyJoinCards && window.replyCfg) ? window.pyJoinCards(out, window.replyCfg()) : out.join(' ');
-}
-try {
-const dc = window.getDefaultCards && window.getDefaultCards('chat');
-if (dc && dc.type !== 'poke' && typeof dc.text === 'string' && dc.text.trim()) t = dc.text;
-} catch (e) {}
-if (!t) {
-if (window.cardLockOpen && window.cardLockOpen()) {
-t = window.pickAskCardReply ? window.pickAskCardReply() : '收到你的回答。';
-} else {
-t = '……';
-}
-}
-return t;
-}
-function surveyPickAnswer(q) {
-if (q && Array.isArray(q.options) && q.options.length) {
-if (q.type === 'multi' && typeof window.mochiPickMulti === 'function') {
-const max = (q.multiMax >= 2 && q.multiMax <= 6) ? q.multiMax
-: (typeof window.askMultiMaxLoad === 'function' ? window.askMultiMaxLoad() : 3);
-return window.mochiPickMulti(q.options.length, max).map(k => String(q.options[k] == null ? '' : q.options[k])).join('、');
-}
-if (q.type === 'single' || q.type === 'multi') return q.options[Math.floor(Math.random() * q.options.length)];
-}
-return surveyAnswerText();
-}
-function surveySeqAnswers(qs, cb, i) {
-if (i >= qs.length) { cb(); return; }
-const q = qs[i];
-const ans = surveyPickAnswer(q);
-const cur = surveyLoad();
-if (cur.status !== 'sent') { cb(); return; }
-cur.answers.push(ans);
-surveySave(cur);
-surveySyncCard(cur);
-if (cur.settings.sendToChat !== false) {
-const isPick = (q.type === 'single' || q.type === 'multi') && Array.isArray(q.options) && q.options.length;
-const msg = isPick
-? '【' + q.text + '】我的选择：' + ans
-: '【' + q.text + '】' + ans;
-try { window.chatAddIn(msg, {}); } catch (e) {}
-}
-surveyRender();
-setTimeout(() => surveySeqAnswers(qs, cb, i + 1), 1200 + Math.floor(Math.random() * 1600));
-}
-let surveySubmitLock = false;
-function surveySubmitAll(d, early) {
-if (surveySubmitLock) return;
-surveySubmitLock = true;
-const remaining = d.qs.slice(d.answers.length);
-const finish = () => {
-surveySubmitLock = false;
-const d2 = surveyLoad();
-if (d2.status !== 'sent') return;
-d2.answers = d2.qs.map((q, i) => d2.answers[i] || surveyPickAnswer(q));
-d2.status = 'done';
-const notify = d2.doneMsgAt !== d2.sentAt;
-if (notify) d2.doneMsgAt = d2.sentAt;
-surveySave(d2);
-surveySyncCard(d2); // v3.33.x #521：交卷态回写聊天问卷卡片
-if (notify) {
-try { window.chatAddSystem(early ? 'TA 提前交卷了（共 ' + d2.qs.length + ' 题）。' : 'TA 交卷了（共 ' + d2.qs.length + ' 题）。', { special: 'ask-msg' }); } catch (e) {}
-}
-surveyRender();
-};
-if (remaining.length) surveySeqAnswers(remaining, finish, 0); else finish();
-}
-function surveyTick() {
-let d;
-try { d = surveyLoad(); } catch (e) { return; }
-if (d.status !== 'sent') return;
-if (Date.now() - (d.sentAt || 0) < 15000) return; // 刚发出 15s 内不动作
-const done = d.answers.length >= d.qs.length;
-const deadlineHit = d.settings.deadline > 0 && Date.now() >= d.settings.deadline;
-const earlyHit = !done && !deadlineHit && Math.random() * 100 < d.settings.prob;
-if (done || deadlineHit || earlyHit) { surveySubmitAll(d, earlyHit); return; }
-const q = d.qs[d.answers.length];
-if (!q) return;
-surveySeqAnswers([q], () => {}, 0);
-}
-setInterval(surveyTick, 30000);
-function surveySend() {
-const d = surveyLoad();
-if (d.status === 'sent') { toast('问卷已发出，TA 正在作答'); return; }
-const tEl = document.getElementById('ta-survey-text');
-if (tEl) { d.text = tEl.value; d.qs = surveyParse(tEl.value); surveySave(d); }
-if (!d.qs.length) { toast('请先填写问卷题目（【问题】+ 选项行 / 「一」行）'); return; }
-if (d.settings.deadline && d.settings.deadline <= Date.now()) { toast('交卷时间已过期，请重新设置'); return; }
-d.status = 'sent'; d.sentAt = Date.now(); d.answers = []; d.doneMsgAt = 0;
-surveySave(d);
-try { window.chatAddSystem('你向TA发出了一份问卷（' + d.qs.length + ' 题）。', { special: 'ask-msg' }); } catch (e) {}
-try {
-window.chatAddSystem('问卷（' + d.qs.length + ' 题）', {
-special: 'ask-survey',
-surveyTs: d.sentAt,
-surveyQs: JSON.parse(JSON.stringify(d.qs)),
-surveyStatus: 'sent',
-surveyAnswers: []
-});
-} catch (e) {}
-surveyRender();
-toast('问卷已发出，TA 开始作答');
-surveyGoChat();
-}
-function surveyRender() {
-const d = surveyLoad();
-const txt = document.getElementById('ta-survey-text');
-if (txt && document.activeElement !== txt && txt.value !== d.text) txt.value = d.text;
-const dl = document.getElementById('ta-survey-deadline');
-if (dl) dl.textContent = d.settings.deadline ? fmtDeadlineText(d.settings.deadline) : '未设置';
-const prob = document.getElementById('ta-survey-prob');
-if (prob && document.activeElement !== prob) prob.value = d.settings.prob;
-const pv = document.getElementById('ta-survey-prob-val');
-if (pv) pv.textContent = d.settings.prob + '%';
-const schatEl = document.getElementById('ta-survey-chat');
-if (schatEl) schatEl.checked = d.settings.sendToChat !== false;
-const mmaxEl = document.getElementById('ta-survey-mmax-val');
-if (mmaxEl) mmaxEl.value = typeof window.askMultiMaxLoad === 'function' ? window.askMultiMaxLoad() : 3;
-const st = document.getElementById('ta-survey-status');
-if (st) {
-if (d.status === 'draft') {
-const nS = d.qs.filter(q => q.type === 'single').length;
-const nM = d.qs.filter(q => q.type === 'multi').length;
-const brk = d.qs.length ? '（单选 ' + nS + ' 题' + (nM ? ' / 多选 ' + nM + ' 题' : '') + ' / 文字 ' + (d.qs.length - nS - nM) + ' 题）' : '';
-const cap = (typeof window.askMultiMaxLoad === 'function' ? window.askMultiMaxLoad() : 3);
-const nCap = d.qs.filter(q => q.type === 'multi' && q.multiMax >= 2).length;
-st.innerHTML = '当前状态：草稿 —— 已解析 <b>' + d.qs.length + '</b> 题' + brk + (nM ? '；多选题' + (nCap ? nCap + ' 题单独限选、其余' : '') + '每次最多选 ' + cap + ' 个。' : '。') + '填好后点「发出问卷给TA」。';
-} else if (d.status === 'sent') {
-st.innerHTML = '当前状态：TA 作答中 —— 已答 <b>' + d.answers.length + '</b> / ' + d.qs.length + ' 题' + (d.settings.deadline ? '；交卷时间 ' + fmtDeadlineText(d.settings.deadline) : '；未设交卷时间') + '；每 30 秒按 ' + d.settings.prob + '% 概率提前交卷。';
-} else {
-st.innerHTML = '当前状态：已交卷 —— 共 ' + d.qs.length + ' 题。可直接再点「发出问卷给TA」重新提交一轮（清空上一轮作答、在聊天里插入新的问卷卡片）。';
-}
-}
-}
-const surveyPage = document.getElementById('page-ta-ask-survey');
-let surveyOpenFromChat = false;
-window.openAskSurvey = function () {
-if (!surveyPage) { toast('批量问卷加载失败'); return; }
-surveyOpenFromChat = true;
-document.querySelectorAll('.page').forEach(p => p.hidden = true);
-surveyPage.hidden = false;
-surveyRender();
-};
-window.openSurveyDetail = function (rec) {
-try {
-const qs = Array.isArray(rec && rec.surveyQs) ? rec.surveyQs : [];
-const answers = Array.isArray(rec && rec.surveyAnswers) ? rec.surveyAnswers : [];
-const done = !!(rec && rec.surveyStatus === 'done');
-const nDone = answers.filter(a => typeof a === 'string' && a.trim()).length;
-if (!qs.length) { toast('这份问卷没有题目'); return; }
-const bankTexts = function () {
-const set = {};
-try { (taAskLoad().questions || []).forEach(b => { if (b && b.text) set[String(b.text)] = true; }); } catch (e) {}
-return set;
-};
-let bankSet = bankTexts();
-const favStates = qs.map(q => !!bankSet[String((q && q.text) || '').trim()]);
-const actBtnCss = 'border:1px solid rgba(127,127,127,.3);background:rgba(127,127,127,.12);color:var(--ink);border-radius:99px;padding:6px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer';
-let html = '';
-html += '<div class="tc-hint">' + escT('你发出的问卷 · 共 ' + qs.length + ' 题 · ' + (done ? '已交卷' : 'TA 作答中（已答 ' + nDone + '/' + qs.length + '）')) + (rec && rec.surveyTs ? '<br>' + escT('发出时间：' + fmtDeadlineText(rec.surveyTs)) : '') + '</div>';
-html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0 2px">' +
-'<button id="sv-fav-card" style="' + actBtnCss + '">♡ 收藏整份问卷</button>' +
-'<button id="sv-fav-allbtn" style="' + actBtnCss + '">★ 全部收藏题目</button>' +
-'</div>';
-html += '<div style="display:flex;align-items:center;gap:14px;justify-content:center;margin:8px 0 10px">' +
-'<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);cursor:pointer"><input type="checkbox" id="sv-fav-chkall" style="width:15px;height:15px">全选</label>' +
-'<button id="sv-fav-sel" style="' + actBtnCss + '">☆ 收藏所选</button>' +
-'</div>';
-html += '<div id="sv-detail-list">';
-qs.forEach((q, i) => {
-const a = answers[i];
-const aTxt = (typeof a === 'string' && a.trim()) ? (window.taFit ? window.taFit(a) : a) : '';
-const opts = (q && Array.isArray(q.options) && q.options.length) ? q.options : null;
-html += '<div class="tc-listitem" style="text-align:left">' +
-'<div class="tc-li-top">' +
-'<input type="checkbox" class="sv-fav-cb" data-i="' + i + '" style="width:16px;height:16px;flex-shrink:0;cursor:pointer">' +
-'<span class="tc-li-q">' + (i + 1) + '. ' + escT((q && q.text) || '') + (opts ? ' <span class="tc-known">' + (q.type === 'multi' ? '多选' + (q.multiMax >= 2 ? '·限' + q.multiMax : '') + '·' : '单选·') + opts.length + '选项</span>' : '') + '</span>' +
-'<span class="sv-fav-state" data-i="' + i + '" style="font-size:11px;font-weight:600;color:#c2864b;flex-shrink:0;white-space:nowrap">' + (favStates[i] ? '★ 已收藏' : '') + '</span>' +
-'</div>' +
-(opts ? '<div class="tc-li-line">选项：' + escT(opts.join(' / ')) + '</div>' : '') +
-(aTxt ? '<div class="tc-li-line" style="color:#3b7a4e;font-weight:600">TA：' + escT(aTxt) + '</div>' : '<div class="tc-li-line">（未作答）</div>') +
-'</div>';
-});
-html += '</div>';
-openTCPanel('问卷详情', html);
-const syncStates = function () {
-document.querySelectorAll('#sv-detail-list .sv-fav-state').forEach(el => {
-const i = Number(el.dataset.i);
-if (el) el.textContent = favStates[i] ? '★ 已收藏' : '';
-});
-};
-const favIntoBank = function (idxList, fromAll) {
-const d = taAskLoad();
-let added = 0, dup = 0;
-idxList.forEach(i => {
-const q = qs[i];
-const text = String((q && q.text) || '').trim();
-if (!text) { dup++; return; }
-if ((d.questions || []).some(b => b && String(b.text || '') === text)) { dup++; return; }
-const nq = { id: 'q_' + Date.now() + '_' + Math.floor(Math.random() * 9999), text: text, cat: 'daily', enabled: true, isPreset: false };
-if (q && Array.isArray(q.options) && q.options.length >= 2) { nq.type = q.type === 'multi' ? 'multi' : 'single'; nq.options = q.options.slice(0, 12).map(o => String(o)); if (nq.type === 'multi' && q.multiMax >= 2) nq.multiMax = q.multiMax; }
-d.questions.push(nq);
-added++;
-});
-if (!added) { toast(fromAll ? '全部题目都已在题库里' : '所选题目都已在题库里'); return; }
-taAskSave(d);
-bankSet = bankTexts();
-qs.forEach((q, i) => { favStates[i] = !!bankSet[String((q && q.text) || '').trim()]; });
-syncStates();
-toast('已收藏 ' + added + ' 道题到问问TA题库' + (dup ? '（' + dup + ' 道已在题库）' : ''));
-};
-const cardBtn = document.getElementById('sv-fav-card');
-if (cardBtn) cardBtn.addEventListener('click', () => {
-let idx = -1;
-try {
-const mlist = (window.getChatMsgs ? window.getChatMsgs() : []) || [];
-for (let i = mlist.length - 1; i >= 0; i--) {
-const r = mlist[i];
-if (r && (r === rec || (rec.surveyTs && r.special === 'ask-survey' && r.surveyTs === rec.surveyTs))) { idx = i; break; }
-}
-} catch (e) {}
-if (idx >= 0 && window.favCardFromMsg) window.favCardFromMsg(idx);
-else toast('找不到原问卷卡片');
-});
-const allBtn = document.getElementById('sv-fav-allbtn');
-if (allBtn) allBtn.addEventListener('click', () => {
-const rest = [];
-qs.forEach((q, i) => { if (!favStates[i]) rest.push(i); });
-if (!rest.length) { toast('全部题目都已在题库里'); return; }
-favIntoBank(rest, true);
-});
-const selBtn = document.getElementById('sv-fav-sel');
-if (selBtn) selBtn.addEventListener('click', () => {
-const picked = [];
-document.querySelectorAll('#sv-detail-list .sv-fav-cb').forEach(cb => { if (cb.checked) picked.push(Number(cb.dataset.i)); });
-if (!picked.length) { toast('请先勾选要收藏的题目'); return; }
-favIntoBank(picked, false);
-});
-const chkAll = document.getElementById('sv-fav-chkall');
-if (chkAll) chkAll.addEventListener('change', () => {
-document.querySelectorAll('#sv-detail-list .sv-fav-cb').forEach(cb => { cb.checked = chkAll.checked; });
-});
-} catch (e) {}
-};
-function surveyGoChat() {
-surveyOpenFromChat = false;
-document.querySelectorAll('.page').forEach(p => p.hidden = true);
-if (window.enterChat) { window.enterChat(); return; }
-const home = document.getElementById('page-ta-ask');
-if (home) home.hidden = false;
-}
-if (surveyPage) {
-const surveyOpen = document.getElementById('ta-ask-survey-open');
-if (surveyOpen) surveyOpen.addEventListener('click', () => {
-document.querySelectorAll('.page').forEach(p => p.hidden = true);
-surveyPage.hidden = false;
-surveyRender();
-});
-const backS = document.getElementById('ta-survey-back');
-if (backS) backS.addEventListener('click', () => {
-surveyGoChat();
-});
-const stxt = document.getElementById('ta-survey-text');
-if (stxt) {
-stxt.addEventListener('change', () => {
-const d = surveyLoad();
-d.text = stxt.value;
-d.qs = surveyParse(stxt.value);
-surveySave(d);
-surveyRender();
-});
-bindTaInpClears(stxt.parentElement);
-}
-const sdl = document.getElementById('ta-survey-deadline');
-const sdlRow = sdl ? sdl.closest('.gs-row') : null;
-if (sdlRow) sdlRow.addEventListener('click', (e) => {
-if (e.target.closest('#ta-survey-deadline-clear')) return;
-openDeadlinePicker('交卷时间', surveyLoad().settings.deadline, (ts) => {
-const d = surveyLoad();
-d.settings.deadline = ts > 0 ? ts : 0;
-surveySave(d);
-toast(d.settings.deadline ? '交卷时间已设置：' + fmtDeadlineText(d.settings.deadline) : '交卷时间已清除');
-surveyRender();
-});
-});
-const sdlClear = document.getElementById('ta-survey-deadline-clear');
-if (sdlClear) sdlClear.addEventListener('click', () => {
-const d = surveyLoad();
-d.settings.deadline = 0;
-surveySave(d);
-if (sdl) sdl.textContent = '未设置';
-toast('交卷时间已清除');
-surveyRender();
-});
-const sprob = document.getElementById('ta-survey-prob');
-if (sprob) sprob.addEventListener('input', () => {
-const d = surveyLoad();
-d.settings.prob = parseInt(sprob.value, 10) || 0;
-surveySave(d);
-const v = document.getElementById('ta-survey-prob-val');
-if (v) v.textContent = sprob.value + '%';
-});
-const schat = document.getElementById('ta-survey-chat');
-if (schat) schat.addEventListener('change', () => {
-const d = surveyLoad();
-d.settings.sendToChat = schat.checked;
-surveySave(d);
-toast(schat.checked ? 'TA 的每条作答都会发送到聊天消息' : 'TA 的作答只写入问卷卡片，不再逐条发到聊天消息');
-});
-const mmaxRow = document.getElementById('ta-survey-mmax');
-if (mmaxRow) {
-const mmaxVal = document.getElementById('ta-survey-mmax-val');
-const clampMMax = () => {
-let n = parseInt(mmaxVal.value, 10);
-if (isNaN(n)) n = 3;
-else n = n < 2 ? 2 : (n > 6 ? 6 : n);
-mmaxVal.value = n;
-if (typeof window.askMultiMaxSave === 'function') window.askMultiMaxSave(n);
-};
-mmaxRow.querySelector('.stp-min').addEventListener('click', (e) => { if (e) e.stopPropagation(); mmaxVal.value = (parseInt(mmaxVal.value, 10) || 3) - 1; clampMMax(); });
-mmaxRow.querySelector('.stp-max').addEventListener('click', (e) => { if (e) e.stopPropagation(); mmaxVal.value = (parseInt(mmaxVal.value, 10) || 3) + 1; clampMMax(); });
-}
-const ssend = document.getElementById('ta-survey-send');
-if (ssend) ssend.addEventListener('click', surveySend);
-const sreset = document.getElementById('ta-survey-reset');
-if (sreset) sreset.addEventListener('click', () => {
-const d = surveyLoad();
-if (d.status === 'draft' && !d.answers.length) { toast('尚未发出问卷'); return; }
-d.status = 'draft'; d.answers = []; d.sentAt = 0;
-surveySave(d);
-surveyRender();
-toast('问卷已撤回（重置为草稿）');
-});
-surveyRender();
-}
+
 var _askCeReflowT = null;
 function _reflowAskCeBoxes() {
 var page = document.getElementById('page-ta-ask');
