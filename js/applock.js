@@ -421,91 +421,11 @@ cancel: function () { padVerify(opts); }
 });
 }, function () { padVerify(opts); });
 }
-function qaStart(afterAll) {
-const items = qaList();
-qaAsk(items, 0, afterAll);
-}
-function qaAsk(items, i, afterAll) {
-if (i >= items.length) { if (afterAll) afterAll(); return; }
-const mask = maskEl();
-mask.hidden = false;
-let rows = '';
-items.forEach(function (it, idx) {
-rows += '<div style="margin:14px 0 0;text-align:left">' +
-'<div class="splash-mandatory-sub" style="margin:0 0 6px;text-align:left;letter-spacing:0">' + (idx + 1) + '、' + it.q + '</div>' +
-'<input class="applock-txt" type="text" id="qa-ans-' + idx + '" maxlength="60" placeholder="输入答案（原样输入，区分大小写）" autocomplete="off" style="width:100%">' +
-'</div>';
-});
-mask.innerHTML = '<div class="splash-mandatory">' +
-'<div class="splash-mandatory-scroll">' +
-'<div class="splash-mandatory-head">' +
-'<div class="splash-mandatory-title">开屏问答 · 进入前请作答</div>' +
-'<div class="splash-mandatory-sub">本站禁止未满 18 周岁的未成年人使用；两题都答对才能进入。答对一次，本机以后不再问答；也可输暗号直接跳过。</div>' +
-'</div>' + rows +
-'<div class="applock-err" id="applock-err" style="text-align:left;margin-top:10px"></div>' +
-'<div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">' +
-'<button class="applock-ok" id="qa-page-ok" type="button" data-submit="1">提交答案</button>' +
-'<button type="button" data-link="skipqa" id="qa-skip-link" style="background:transparent;border:none;color:var(--muted,#999);font-size:11px;text-decoration:underline;padding:6px;cursor:pointer">输暗号跳过问答（本机永久）</button>' +
-'</div>' +
-'</div></div>';
-const submit = function () {
-let firstBad = -1;
-items.forEach(function (it, idx) {
-const inp = document.getElementById('qa-ans-' + idx);
-const v = inp ? inp.value : '';
-if (!qaAnswerOk(v, it.h)) { if (firstBad < 0) firstBad = idx; if (inp) inp.value = ''; }
-});
-const errEl = document.getElementById('applock-err');
-if (firstBad >= 0) {
-if (errEl) errEl.textContent = '第 ' + (firstBad + 1) + ' 题答案不对，再想想～（两题都要答对才能进入）';
-return;
-}
-if (errEl) errEl.textContent = '';
-qaSkipSet(true);
-try { if (window.toast) window.toast('已解锁：本机以后不再问答'); } catch (e) {}
-if (afterAll) afterAll();
-};
-const okBtn = document.getElementById('qa-page-ok');
-if (okBtn) okBtn.addEventListener('click', submit);
-items.forEach(function (it, idx) {
-const inp = document.getElementById('qa-ans-' + idx);
-if (inp) inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
-});
-const skip = document.getElementById('qa-skip-link');
-if (skip) skip.addEventListener('click', function () { qaSkipAsk(items, 0, afterAll); });
-}
-function qaSkipAsk(items, i, afterAll) {
-textAsk({
-title: '跳过开屏问答', sub: '暗号一共 6 位数字：前两位是 99，后 4 位是 mochi 字卡生日的字面数字（把生日日期原样写成 4 位数）。mochi 字卡的生日写在开屏第一页的章节目录里（点开第一页顶部的「目录」逐章翻一下就能找到）——第一页的章节目录里和第二页最顶那张时间线卡都写着——日期一直是很简单的字面意思，不是隐藏答案；开屏最底下的部署时间不算（那只是用来判断有没有更新到新版本）。输入暗号后，这台设备以后每次打开都不再问答（不再显示问答层）。警告：一旦有人把密码二传（告诉别人），发现后密码就会被重新设置，请不要外传。不输入暗号也不影响正常使用。这个暗号与开屏公告区「防未成年人·内置字卡锁定」卡的二级验证密码是同一个（同一串 6 位数字）：在那张卡点「输入密码解锁」用的也是它。',
-placeholder: '输暗号', maxlen: 12, okLabel: '确定', cancelLabel: '返回',
-onSubmit: function (v) {
-if (normCode(v) === QA_SKIP_CODE) {
-qaSkipSet(true);
-toast('已跳过：本机以后不再问答');
-qaAsk(items, items.length, afterAll);   // 直接进下一层（密码锁 或 解锁完成）
-} else {
-const inp = document.getElementById('applock-txt'); if (inp) inp.value = '';
-showErr('暗号不对');
-}
-},
-onCancel: function () { qaAsk(items, i, afterAll); }
-});
-}
 function evalLock() {
 if (MASK && !MASK.hidden) return;   // 已锁屏中
 if (enabled() && !pinHash()) { selfHealChecked(); return; }
 const needPin = enabled() && !!pinHash();
-const needQa = qaEnabled() && !qaSkipped();
-if (!needPin && !needQa) return;
-if (needQa) {
-qaStart(function () {
-pinHintThen(function () {
-if (needPin && !sessOk()) showLock();
-else { sessMark(); maskEl().hidden = true; }
-});
-});
-return;
-}
+if (!needPin) return;
 if (sessOk()) return;               // 数字密码锁：本会话已解过 → 同标签刷新不重锁
 showLock();
 }
@@ -704,16 +624,10 @@ function init() {
 bindSettings();
 bindQaSettings();
 if (IS_AUTOMATION) { fireLock(); return; }
-let tries = 0;
-const waitSplash = function () {
-if (!document.getElementById('splash')) { fireLock(); return; }
-if (++tries > 60) { fireLock(); return; }   // 最多等 ~30s，开屏异常不隐藏时兜底
-setTimeout(waitSplash, 500);
-};
-setTimeout(waitSplash, 400);   // 让开屏先完成首帧
+setTimeout(fireLock, 400);
 document.addEventListener('mochi-restore-done', function () {
 if (IS_AUTOMATION) { fireLock(); return; }
-if (!document.getElementById('splash')) { fireLock(); }
+fireLock();
 });
 }
 if (document.body) init();
