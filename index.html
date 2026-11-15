@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual">
-<title>Mochi 字卡传讯（完全免费·禁止倒卖）</title>
+<title>KaKaShi 字卡传讯（完全免费·禁止倒卖）</title>
 <meta name="description" content="情侣专属的字卡传讯，不是小手机。本站完全免费，任何收费均为倒卖诈骗；唯一作者：小红书@言序（1842523578）。如果你是花钱买来的链接：你被骗了，请拒付退款并举报卖家。">
 <meta name="theme-color" content="#e9e9e9">
 <link rel="manifest" href="./manifest.json">
@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Mochi">
+<meta name="apple-mobile-web-app-title" content="KaKaShi">
 <meta name="format-detection" content="telephone=no,address=no,email=no">
 <!-- v3.6.x：全局无 Referer——网易云外链（music.163.com/song/media/outer/url）
      对带 Referer 的请求返回 403（防盗链），移动端 WebView/Edge 对
@@ -336,7 +336,7 @@ padding-top:max(calc(14px + var(--mochi-safe-top, 0px)), 14px);
 }
 .chat-body { overflow-anchor: none; }
 .chat-body.scroll-anchor-auto { overflow-anchor: auto; }
-.statusbar .brand { font-weight:800; letter-spacing:.5px; }
+.statusbar .brand { font-weight:800; letter-spacing:.5px; min-width:0; max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .statusbar .sb-right { display:flex; align-items:center; gap:8px; }
 .statusbar .icons { display:flex; gap:6px; align-items:center; }
 .page { flex:1; display:flex; flex-direction:column; overflow-y:auto; z-index:2; padding-bottom:4px; }
@@ -4862,6 +4862,156 @@ padding:10px 14px 0;
 .mail-reply-hint { font-size:12px; color:var(--muted); text-align:center; margin-bottom:10px; }
 .mail-write-hint { font-size:12px; color:var(--muted); text-align:center; padding:10px 0; }
 .mail-compose { padding:4px 0; }
+.diary-book { display:flex; min-height:420px; border-radius:12px; overflow:hidden; background:#f5f0e8; border:1px solid rgba(0,0,0,.08); box-shadow:0 4px 16px rgba(0,0,0,.08); }
+.diary-book-spine { flex-shrink:0; width:22px; background:linear-gradient(90deg,#c9b896,#dbcbb0); border-right:1px solid rgba(0,0,0,.06); position:relative; }
+.diary-book-spine::before { content:''; position:absolute; left:50%; top:20px; bottom:20px; width:6px; transform:translateX(-50%); background:repeating-linear-gradient(0deg,transparent,transparent 18px,rgba(0,0,0,.12) 18px,rgba(0,0,0,.12) 20px); border-radius:3px; }
+.diary-page { flex:1; background:#fffdf8; padding:20px 18px; position:relative; display:flex; flex-direction:column; background-image:radial-gradient(rgba(0,0,0,.02) 1px,transparent 1px); background-size:20px 20px; }
+.diary-page::before { content:''; position:absolute; left:0; top:0; bottom:0; width:1px; background:rgba(0,0,0,.04); }
+.diary-page-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:10px; border-bottom:2px dashed rgba(0,0,0,.1); }
+.diary-page-title { font-size:17px; font-weight:700; color:var(--ink); font-family:"Segoe Script","Comic Sans MS",cursive; }
+.diary-page-date { font-size:12px; color:var(--muted); font-family:"Segoe Script","Comic Sans MS",cursive; }
+.diary-page-body { min-height:300px; background:repeating-linear-gradient(transparent,transparent 27px,rgba(0,0,0,.06) 27px,rgba(0,0,0,.06) 28px); line-height:28px; }
+.diary-empty-tip { padding:40px 0; text-align:center; font-size:13px; color:var(--muted); }
+.diary-tabs { display:flex; gap:8px; margin-bottom:14px; }
+.diary-tab { flex:1; padding:10px 12px; border:none; border-radius:10px; background:rgba(0,0,0,.05); color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; font-family:inherit; }
+.diary-tab.active[data-dtab="mine"] { background:#6b9bd1; color:#fff; }
+.diary-tab.active[data-dtab="ta"] { background:#d4a5b5; color:#fff; }
+.diary-type-chips { display:flex; flex-wrap:wrap; gap:8px; padding:12px 14px; }
+.diary-type-chip { display:inline-flex; align-items:center; padding:6px 14px; font-size:12px; font-weight:600; font-family:inherit; border:1px solid rgba(0,0,0,.1); background:rgba(255,255,255,.92); color:#666; border-radius:999px; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:all .2s; }
+.diary-type-chip.sel { background:var(--ink); color:#fff; border-color:var(--ink); }
+.diary-type-chip:active { transform:scale(.95); }
+.diary-reminder { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; margin-bottom:12px; background:linear-gradient(135deg,#fff9e6,#fff0d6); border:1px solid #f0e0b0; border-radius:10px; font-size:13px; color:#8a6d3b; animation:diaryReminderIn .3s ease; }
+@keyframes diaryReminderIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+.diary-reminder-text { flex:1; line-height:1.4; }
+.diary-reminder-close { width:22px; height:22px; border:none; background:rgba(0,0,0,.08); border-radius:50%; color:#8a6d3b; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:0; }
+.diary-reminder-close:hover { background:rgba(0,0,0,.15); }
+.desk-diary-reminder { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; margin:8px 12px; background:linear-gradient(135deg,#fff9e6,#fff0d6); border:1px solid #f0e0b0; border-radius:10px; font-size:13px; color:#8a6d3b; animation:diaryReminderIn .3s ease; z-index:50; position:relative; }
+.desk-diary-reminder-text { flex:1; line-height:1.4; }
+.desk-diary-reminder-close { width:22px; height:22px; border:none; background:rgba(0,0,0,.08); border-radius:50%; color:#8a6d3b; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:0; }
+.desk-diary-reminder-close:hover { background:rgba(0,0,0,.15); }
+.diary-reminder[hidden], .desk-diary-reminder[hidden] { display:none !important; }
+.diary-stats { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.diary-stat-tag { padding:6px 12px; border-radius:20px; font-size:12px; color:var(--muted); background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.06); }
+.diary-stat-tag b { color:var(--ink); font-weight:600; margin:0 2px; }
+.diary-stat-mine { background:#f0f7ff; border-color:rgba(107,155,209,.2); }
+.diary-stat-mine b { color:#4a7ba8; }
+.diary-stat-ta { background:#fff0f5; border-color:rgba(212,165,181,.2); }
+.diary-stat-ta b { color:#a87a8a; }
+.diary-calendar { margin-bottom:16px; padding:14px; background:rgba(0,0,0,.02); border:1px solid rgba(0,0,0,.06); border-radius:12px; }
+.diary-calendar-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:0; cursor:pointer; user-select:none; }
+.diary-calendar-title { font-size:14px; font-weight:600; color:var(--ink); font-family:"Segoe Script","Comic Sans MS",cursive; }
+.diary-calendar-fold { font-size:12px; color:var(--muted); transition:transform .2s; width:20px; text-align:center; }
+.diary-calendar-fold.collapsed { transform:rotate(-90deg); }
+.diary-calendar-body { margin-top:10px; }
+.diary-calendar-body.collapsed { display:none; }
+.diary-calendar-nav { width:28px; height:28px; border:none; background:rgba(0,0,0,.05); border-radius:50%; color:var(--ink); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+.diary-calendar-nav:hover { background:rgba(0,0,0,.1); }
+.diary-calendar-week { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; }
+.diary-calendar-week span { text-align:center; font-size:11px; color:var(--muted); padding:4px 0; }
+.diary-calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.diary-cal-day { position:relative; aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--ink); border-radius:50%; cursor:pointer; transition:background .15s; }
+.diary-cal-day:hover { background:rgba(0,0,0,.06); }
+.diary-cal-day.empty { visibility:hidden; }
+.diary-cal-day.other-month { color:var(--muted); opacity:.4; }
+.diary-cal-day.today { background:#6b9bd1; color:#fff; font-weight:600; }
+.diary-cal-day.has-diary::after { content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background:#6b9bd1; }
+.diary-cal-day.today.has-diary::after { background:#fff; }
+.diary-cal-day.has-diary-mine::after { background:#6b9bd1; }
+.diary-cal-day.has-diary-ta::after { background:#d4a5b5; }
+.diary-cal-day.has-diary-both::after { background:linear-gradient(90deg,#6b9bd1 50%,#d4a5b5 50%); }
+.diary-search-box { position:relative; display:flex; align-items:center; margin-bottom:12px; }
+.diary-search-icon { position:absolute; left:12px; width:16px; height:16px; color:var(--muted); pointer-events:none; }
+.diary-search-input { width:100%; padding:10px 12px 10px 36px; border:1px solid rgba(0,0,0,.08); border-radius:10px; background:rgba(0,0,0,.03); font-size:13px; color:var(--ink); outline:none; font-family:inherit; transition:border-color .2s,background .2s; }
+.diary-search-input:focus { border-color:#6b9bd1; background:rgba(107,155,209,.05); }
+.diary-search-input::placeholder { color:var(--muted); }
+.diary-search-clear { position:absolute; right:8px; width:24px; height:24px; border:none; background:rgba(0,0,0,.08); border-radius:50%; color:var(--muted); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; padding:0; }
+.diary-search-clear:hover { background:rgba(0,0,0,.15); color:var(--ink); }
+.diary-search-highlight { background:#ffe58f; color:#ad6800; padding:0 2px; border-radius:2px; font-weight:600; }
+.diary-actions { margin-bottom:14px; }
+.diary-actions .ta-add-btn { width:100%; }
+.diary-settings-wrap { position:relative; width:34px; height:34px; flex-shrink:0; }
+.diary-settings-menu { position:absolute; top:calc(100% + 8px); right:0; z-index:100; width:184px; max-width:calc(100vw - 24px); max-height:calc(100vh - 80px); padding:6px; box-sizing:border-box; overflow-y:auto; background:var(--card-bg,#fff); border:1px solid rgba(0,0,0,.1); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.16); }
+.diary-settings-menu[hidden] { display:none; }
+.diary-settings-menu button { display:flex; align-items:center; width:100%; padding:11px 12px; border:0; border-radius:8px; background:transparent; color:var(--ink); font-family:inherit; font-size:14px; font-weight:500; text-align:left; white-space:nowrap; cursor:pointer; }
+.diary-settings-menu button:hover, .diary-settings-menu button:active { background:rgba(127,127,127,.14); }
+@media (max-width:480px) {
+#page-diary .diary-settings-menu { position:fixed; top:calc(60px + var(--mochi-safe-top,env(safe-area-inset-top,0px))); right:12px; width:calc(100vw - 24px); max-width:360px; max-height:calc(100vh - 84px); max-height:calc(100dvh - 84px); }
+}
+.diary-list { display:flex; flex-direction:column; gap:12px; }
+.diary-item { position:relative; border-radius:4px 16px 16px 16px; padding:16px 14px; cursor:pointer; transition:transform .15s,box-shadow .15s; border:1px solid rgba(0,0,0,.06); box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.diary-item::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; border-radius:4px 16px 0 0; }
+.diary-item-mine { background:#f0f7ff; }
+.diary-item-mine::before { background:#6ba8e8; }
+.diary-item-ta { background:#fff0f5; border-radius:16px 4px 16px 16px; }
+.diary-item-ta::before { background:#e88bb0; border-radius:16px 4px 0 0; }
+.diary-item:active { transform:scale(.985) rotate(-.5deg); }
+.diary-item-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.diary-item-title { font-size:14px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+.diary-item-time { font-size:11px; color:var(--muted); flex-shrink:0; margin-left:10px; }
+.diary-item-preview { font-size:12px; color:var(--muted); line-height:1.5; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.diary-empty { text-align:center; padding:40px 0; font-size:13px; color:var(--muted); }
+.diary-month-group { margin-bottom:6px; }
+.diary-month-header { display:flex; align-items:center; gap:8px; padding:10px 4px; cursor:pointer; user-select:none; border-radius:8px; transition:background .15s; }
+.diary-month-header:hover { background:rgba(0,0,0,.04); }
+.diary-month-header:active { background:rgba(0,0,0,.07); }
+.diary-month-title { font-size:14px; font-weight:600; color:var(--ink); font-family:"Segoe Script","Comic Sans MS",cursive; }
+.diary-month-count { font-size:12px; color:var(--muted); margin-left:auto; }
+.diary-month-toggle { font-size:12px; color:var(--muted); transition:transform .2s; width:16px; text-align:center; }
+.diary-month-header.collapsed .diary-month-toggle { transform:rotate(-90deg); }
+.diary-month-entries { display:flex; flex-direction:column; gap:12px; padding-top:4px; }
+.diary-month-entries.collapsed { display:none; }
+.diary-textarea { flex:1; min-height:220px; border:none; background:transparent; resize:none; outline:none; font-size:14px; line-height:28px; color:var(--ink); font-family:"Segoe Script","Comic Sans MS",cursive; background:repeating-linear-gradient(transparent,transparent 27px,rgba(0,0,0,.06) 27px,rgba(0,0,0,.06) 28px); }
+.diary-textarea::placeholder { color:var(--muted); }
+.diary-edit-visible { margin-top:12px; padding:10px 12px; background:rgba(0,0,0,.03); border-radius:8px; }
+.diary-visible-label { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink); cursor:pointer; }
+.diary-visible-label input[type="checkbox"] { width:16px; height:16px; accent-color:var(--ink); }
+.diary-edit-btns { display:flex; gap:10px; margin-top:14px; }
+.diary-edit-btns .modal-btn { flex:1; }
+.diary-detail-body { flex:1; min-height:220px; font-size:14px; line-height:28px; color:var(--ink); white-space:pre-wrap; word-break:break-word; background:repeating-linear-gradient(transparent,transparent 27px,rgba(0,0,0,.06) 27px,rgba(0,0,0,.06) 28px); font-family:"Segoe Script","Comic Sans MS",cursive; }
+.diary-detail-mine { border-left:3px solid #6ba8e8; padding-left:12px; }
+.diary-detail-ta { border-left:3px solid #e88bb0; padding-left:12px; }
+.diary-settings-body { display:flex; flex-direction:column; gap:24px; padding:10px 0; }
+.diary-setting-row { display:flex; flex-direction:column; gap:8px; }
+.diary-setting-label { display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:600; color:var(--ink); }
+.diary-setting-val { font-size:13px; color:var(--muted); font-weight:400; }
+.diary-setting-hint { font-size:12px; color:var(--muted); line-height:1.4; }
+[data-theme="dark"] .diary-book { background:#2a2a2a; border-color:var(--dark-border); }
+[data-theme="dark"] .diary-book-spine { background:linear-gradient(90deg,#3a3a3a,#4a4a4a); border-right-color:var(--dark-border); }
+[data-theme="dark"] .diary-page { background:#333; background-image:radial-gradient(rgba(255,255,255,.02) 1px,transparent 1px); }
+[data-theme="dark"] .diary-page::before { background:rgba(255,255,255,.06); }
+[data-theme="dark"] .diary-page-head { border-bottom-color:rgba(255,255,255,.15); }
+[data-theme="dark"] .diary-page-body { background:repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,.08) 27px,rgba(255,255,255,.08) 28px); }
+[data-theme="dark"] .diary-tab { background:rgba(255,255,255,.08); color:var(--muted); }
+[data-theme="dark"] .diary-tab.active[data-dtab="mine"] { background:#4a7ba8; color:#fff; }
+[data-theme="dark"] .diary-tab.active[data-dtab="ta"] { background:#a87a8a; color:#fff; }
+[data-theme="dark"] .diary-type-chip { background:var(--dark-hover); border-color:var(--dark-border-12); color:var(--dark-soft); }
+[data-theme="dark"] .diary-type-chip.sel { background:var(--ink); color:#fff; border-color:var(--ink); }
+[data-theme="dark"] .diary-item-mine { background:#2a3a4a; border-color:var(--dark-border); }
+[data-theme="dark"] .diary-item-ta { background:#3a2a35; border-color:var(--dark-border); }
+[data-theme="dark"] .diary-textarea { background:repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,.08) 27px,rgba(255,255,255,.08) 28px); color:var(--ink); }
+[data-theme="dark"] .diary-detail-body { background:repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,.08) 27px,rgba(255,255,255,.08) 28px); }
+[data-theme="dark"] .diary-edit-visible { background:rgba(255,255,255,.05); }
+[data-theme="dark"] .diary-month-header:hover { background:rgba(255,255,255,.06); }
+[data-theme="dark"] .diary-month-header:active { background:rgba(255,255,255,.1); }
+[data-theme="dark"] .diary-search-input { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12); color:var(--ink); }
+[data-theme="dark"] .diary-search-input:focus { border-color:#4a7ba8; background:rgba(74,123,168,.1); }
+[data-theme="dark"] .diary-search-clear { background:rgba(255,255,255,.12); color:var(--muted); }
+[data-theme="dark"] .diary-search-clear:hover { background:rgba(255,255,255,.2); color:var(--ink); }
+[data-theme="dark"] .diary-search-highlight { background:#ad6800; color:#ffe58f; }
+[data-theme="dark"] .diary-reminder { background:linear-gradient(135deg,#3a3520,#3a3020); border-color:#5a4a30; color:#d4c090; }
+[data-theme="dark"] .diary-reminder-close { background:rgba(255,255,255,.1); color:#d4c090; }
+[data-theme="dark"] .diary-stat-tag { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.1); }
+[data-theme="dark"] .diary-stat-mine { background:#2a3a4a; border-color:rgba(107,155,209,.3); }
+[data-theme="dark"] .diary-stat-ta { background:#3a2a35; border-color:rgba(212,165,181,.3); }
+[data-theme="dark"] .diary-calendar { background:rgba(255,255,255,.03); border-color:rgba(255,255,255,.08); }
+[data-theme="dark"] .diary-calendar-nav { background:rgba(255,255,255,.08); color:var(--ink); }
+[data-theme="dark"] .diary-calendar-nav:hover { background:rgba(255,255,255,.15); }
+[data-theme="dark"] .diary-cal-day:hover { background:rgba(255,255,255,.08); }
+[data-theme="dark"] .diary-cal-day.today { background:#4a7ba8; }
+[data-theme="dark"] .diary-cal-day.has-diary-mine::after { background:#6b9bd1; }
+[data-theme="dark"] .diary-cal-day.has-diary-ta::after { background:#d4a5b5; }
+[data-theme="dark"] .desk-diary-reminder { background:linear-gradient(135deg,#3a3520,#3a3020); border-color:#5a4a30; color:#d4c090; }
+[data-theme="dark"] .desk-diary-reminder-close { background:rgba(255,255,255,.1); color:#d4c090; }
 .mail-send-bar { flex-shrink:0; padding:10px 0 calc(6px + var(--mochi-safe-bottom,env(safe-area-inset-bottom,0px))); }
 .mail-send-bar .ta-add-btn { width:100%; }
 .mail-toolbar {
@@ -10204,7 +10354,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
   <div class="phone">
       <div class="phone-bg-mask"></div>
       <div class="statusbar">
-        <span class="brand">Mochi</span>
+        <span class="brand">KaKaShi</span>
         <div class="sb-right">
           <span id="clock">9:41</span>
           <div class="icons">
@@ -10234,6 +10384,10 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
              （此前只有 设置→工具 一个入口，在设置列表后面根本看不见桌面/聊天现场＝盲调） -->
         <button class="decor-add" id="decor-fit" title="屏幕适配微调（顶部遮挡/底部裁切/留白/字太小）">屏幕适配</button>
         <button class="decor-done" id="decor-done">完成</button>
+      </div>
+      <div class="desk-diary-reminder" id="desk-diary-reminder" hidden>
+        <span class="desk-diary-reminder-text" id="desk-diary-reminder-text"></span>
+        <button class="desk-diary-reminder-close" id="desk-diary-reminder-close">&times;</button>
       </div>
       <div class="desktop-pages" id="desktop-pages">
       <div class="page-slide">
@@ -10452,6 +10606,16 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
 <!-- 本页动态注入 喝水/吃什么/存钱罐/番茄钟（p2-features.js，喝水排在本页静态图标之后） -->
 </div>
       </div><!-- /page-slide 第三页 -->
+
+      <!-- 第四页：日记 -->
+      <div class="page-slide fourth">
+        <div class="app-grid p4-grid" data-app="p4" data-desk-widget="p4apps">
+          <div class="app" data-app="diary" data-desk-widget="app-diary">
+            <div class="app-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></div>
+            <div class="app-name">日记</div>
+          </div>
+        </div>
+      </div><!-- /page-slide 第四页 -->
       </div><!-- /desktop-pages -->
 
       <!-- 桌面小组件隐藏池：被移除/未添加的组件暂存于此（display:none）。
@@ -11261,7 +11425,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
           <div class="txt"><span id="sf-fullscreen-label">全屏模式（隐藏手机状态栏）</span><span class="tag" id="sf-fullscreen-help" role="button" tabindex="0" aria-haspopup="dialog">功能说明</span></div>
           <label class="toggle"><input type="checkbox" id="sf-fullscreen"><span class="tk"></span></label>
         </div>
-        <div class="gs-sub" id="sf-fullscreen-sub"><b>手机端切到后台（锁屏 / 切去别的应用）会自动退出全屏，这是设备限制、不是 bug</b>，切回来手动再开一次即可。<br>开启后尽量隐藏手机顶部状态栏/浏览器栏，让内容占满全屏。<br>iOS 限制：iPhone 顶部系统状态栏（时间/电量）由系统控制，任何网页都无法隐藏；从主屏幕打开时本开关会让内容顶满屏幕，应用内模拟状态栏（Mochi/时间/电量）下移到系统状态栏正下方、两栏不重叠。</div>
+        <div class="gs-sub" id="sf-fullscreen-sub"><b>手机端切到后台（锁屏 / 切去别的应用）会自动退出全屏，这是设备限制、不是 bug</b>，切回来手动再开一次即可。<br>开启后尽量隐藏手机顶部状态栏/浏览器栏，让内容占满全屏。<br>iOS 限制：iPhone 顶部系统状态栏（时间/电量）由系统控制，任何网页都无法隐藏；从主屏幕打开时本开关会让内容顶满屏幕，应用内模拟状态栏（KaKaShi/时间/电量）下移到系统状态栏正下方、两栏不重叠。</div>
       </div>
       <!-- FIX 2026-09-19 #805（工作树被并行旧缓冲打回，2026-09-20 随 #927 重放）：导出数据/导入数据自「工具」段移入通用段——
            备份是防丢的唯一防线，放太靠后的 tag 用户不知道有这个功能；row id 不变，直达跳转按 closest('.them-sec') 动态取 tag -->
@@ -11375,15 +11539,15 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
              退出来又变轻」）——默认静音音频改走 WebAudio 通道，不再向系统声明「本站正在放媒体」＝不把别的
              App 的音量压低；关掉＝回到老路（媒体元素＋通知栏媒体条）。逻辑在 bg-keep.js 的 kaBuildTransducer -->
         <div class="gs-row"><span>保活不抢其他 App 的声音</span><label class="toggle"><input type="checkbox" id="bg-keep-noduck"><span class="tk"></span></label></div>
-        <div class="gs-sub" id="bg-keep-noduck-sub"><b>默认开启</b>：保活那段近无声音频改走「站内音效」那条通道，不再向手机声明「本站正在放媒体」——你在别的 App 听歌 / 看视频时不会被它压低音量，切进切出也不再忽响忽轻。代价：通知栏那条「Mochi 后台保活」不再出现（那条媒体横幅本身就是这次音频通道的占用）；个别只认这条媒体条豁免的浏览器后台收消息可能变差，把本开关关掉即回到老路（有媒体条、会压低别的 App）。上传了自定义保活音频时本开关不参与——那是你要出声放的东西，照旧占用音频通道。</div>
+        <div class="gs-sub" id="bg-keep-noduck-sub"><b>默认开启</b>：保活那段近无声音频改走「站内音效」那条通道，不再向手机声明「本站正在放媒体」——你在别的 App 听歌 / 看视频时不会被它压低音量，切进切出也不再忽响忽轻。代价：通知栏那条「KaKaShi 后台保活」不再出现（那条媒体横幅本身就是这次音频通道的占用）；个别只认这条媒体条豁免的浏览器后台收消息可能变差，把本开关关掉即回到老路（有媒体条、会压低别的 App）。上传了自定义保活音频时本开关不参与——那是你要出声放的东西，照旧占用音频通道。</div>
         <!-- #977：后台保活两条硬限制当面铺在行下（用户直派「两功能要提示用户：后台长时间挂着会失效，
              需重新关掉网页打开并重新打开功能；别的 App 刷视频/听音乐会占用音频截断保活，也要写清楚」）。
              红色视觉复用 #961 红条族；完整口径见本组「功能说明」胶囊与 使用说明 第 10 节 -->
-        <div class="gs-sub dict-lock-hint" id="bg-keep-sub">⚠️ <b>两条必知限制（手机/浏览器限制，不是故障）</b>：① <b>别的 App 刷视频、听音乐会把保活截断</b>——它们占用手机音频通道，保活音频被暂停＝保活失效，回到本页才自动恢复，截断期间后台消息收不到；② <b>后台挂久了会失效</b>——系统省电/内存策略会把挂久的页面冻结甚至丢弃重载（Edge「睡眠标签页」/Chrome「内存节省程序」约 30 分钟；手机内存紧张时更快——本页越重，几分钟也可能被丢），<b>失效后请彻底关闭网页重新打开，再把「后台保活」「后台弹窗」开关重新打开</b>。其实被回收后回到本页会自动重载：开关自动恢复、保活在你碰一下页面时就自动接上，数据不丢；<b>止住它最有效的一步＝去 系统设置 → 应用 → 本浏览器（或桌面上的 Mochi）→ 省电 / 电池策略 选「无限制 / 允许后台活动」，再在最近任务里把本站锁定、别横向划掉</b>；⚠ 只关 Edge「睡眠标签页」/ Chrome「内存节省程序」往往白忙活——那两个只管<b>浏览器里的标签页</b>，已添加到桌面的本站是独立应用，改那里管不到它。再把 设置→查看存储 里最占数据的两项清一清（页越轻越不容易被丢）。<br>另外：<b>开着「后台保活」或「后台通知」时，页面不会在后台自动换新版</b>——换新版要重载页面、会把后台运行打断；更新不再弹条提醒，想换新版就彻底关闭网页重开，或到 设置 → 关于 →「检查更新」手动刷（不刷也不影响使用）。</div>
+        <div class="gs-sub dict-lock-hint" id="bg-keep-sub">⚠️ <b>两条必知限制（手机/浏览器限制，不是故障）</b>：① <b>别的 App 刷视频、听音乐会把保活截断</b>——它们占用手机音频通道，保活音频被暂停＝保活失效，回到本页才自动恢复，截断期间后台消息收不到；② <b>后台挂久了会失效</b>——系统省电/内存策略会把挂久的页面冻结甚至丢弃重载（Edge「睡眠标签页」/Chrome「内存节省程序」约 30 分钟；手机内存紧张时更快——本页越重，几分钟也可能被丢），<b>失效后请彻底关闭网页重新打开，再把「后台保活」「后台弹窗」开关重新打开</b>。其实被回收后回到本页会自动重载：开关自动恢复、保活在你碰一下页面时就自动接上，数据不丢；<b>止住它最有效的一步＝去 系统设置 → 应用 → 本浏览器（或桌面上的 KaKaShi）→ 省电 / 电池策略 选「无限制 / 允许后台活动」，再在最近任务里把本站锁定、别横向划掉</b>；⚠ 只关 Edge「睡眠标签页」/ Chrome「内存节省程序」往往白忙活——那两个只管<b>浏览器里的标签页</b>，已添加到桌面的本站是独立应用，改那里管不到它。再把 设置→查看存储 里最占数据的两项清一清（页越轻越不容易被丢）。<br>另外：<b>开着「后台保活」或「后台通知」时，页面不会在后台自动换新版</b>——换新版要重载页面、会把后台运行打断；更新不再弹条提醒，想换新版就彻底关闭网页重开，或到 设置 → 关于 →「检查更新」手动刷（不刷也不影响使用）。</div>
         <div class="gs-row"><span>后台通知</span><label class="toggle"><input type="checkbox" id="bg-notify"><span class="tk"></span></label><button class="bg-notify-test" id="bg-notify-test">测试</button></div>
         <!-- v3.26.x：后台弹窗使用说明——要点直接铺在行下（用户直派「后台弹窗要有使用说明、详细说清楚」），
              完整步骤见本行「功能说明」胶囊（settings-help.js #bg-notify）与 使用说明 → 第 10 节 -->
-        <div class="gs-sub" id="bg-notify-sub"><b>后台弹窗＝页面切到后台（锁屏 / 切到别的应用）时，TA 发消息用系统通知弹横幅。</b>必备：① 本机得有网页通知能力——安卓或电脑上的 Chrome / Edge（Chromium 内核）且 https 打开，或 iPhone / iPad 用 Safari「添加到主屏幕」后从桌面图标打开本站（标签页形态没有这个能力）；小米 / vivo / OPPO 自带浏览器、UC、夸克这些没有通知能力，开不起来；② 允许通知权限（地址栏左侧图标 → 网站设置 → 通知）；③ 本开关（会自动开启「后台保活」——后台不产生消息就无从弹起）；④ 系统设置里给浏览器允许通知、且不限制其后台运行/省电（小米 / 红米还要开「在屏幕上方显示 / 悬浮通知」）。<b>iPhone / iPad：Safari 标签页里没有网页通知能力，要到 Safari「添加到主屏幕」后从桌面图标打开本站，这个开关才开得了</b>——那边能授权、能弹系统通知；但 iOS 不给网页推送服务端，应用被系统收回后不保证弹，所以「后台保活」要一起开着，并可用「桌面消息弹窗」的应用内横幅兜底。点本行「功能说明」看完整步骤与「收不到」的排查，点右侧「测试」＝后台弹窗自测：第一段当场体检（开关/权限/保活/后台服务）并真发一条；成功后再点「现在测（切后台）」按 Home 切后台，第二段会由页面在后台再发一条、回来给结论。<b>⚠ 后台弹窗跟着保活一起：保活被截断/页面被丢弃＝后台弹窗一起停摆</b>（别的 App 刷视频、听歌占用音频；挂后台太久被系统冻结——见上方红字）；失效后彻底关闭网页重新打开，再把两个开关重新打开。<b>还有一条最容易漏：手机开了勿扰 / 免打扰（iPhone 叫「专注模式」）时，通知被系统静默收进通知栏、屏幕上方不弹横幅</b>——网页读不到它，「测试」体检全绿你也可能什么都没看到；先下拉通知栏看那条测试通知在不在，在＝被系统压住（去系统设置关掉勿扰，或把本浏览器 / 桌面上的 Mochi 加进勿扰的允许例外）。</div>
+        <div class="gs-sub" id="bg-notify-sub"><b>后台弹窗＝页面切到后台（锁屏 / 切到别的应用）时，TA 发消息用系统通知弹横幅。</b>必备：① 本机得有网页通知能力——安卓或电脑上的 Chrome / Edge（Chromium 内核）且 https 打开，或 iPhone / iPad 用 Safari「添加到主屏幕」后从桌面图标打开本站（标签页形态没有这个能力）；小米 / vivo / OPPO 自带浏览器、UC、夸克这些没有通知能力，开不起来；② 允许通知权限（地址栏左侧图标 → 网站设置 → 通知）；③ 本开关（会自动开启「后台保活」——后台不产生消息就无从弹起）；④ 系统设置里给浏览器允许通知、且不限制其后台运行/省电（小米 / 红米还要开「在屏幕上方显示 / 悬浮通知」）。<b>iPhone / iPad：Safari 标签页里没有网页通知能力，要到 Safari「添加到主屏幕」后从桌面图标打开本站，这个开关才开得了</b>——那边能授权、能弹系统通知；但 iOS 不给网页推送服务端，应用被系统收回后不保证弹，所以「后台保活」要一起开着，并可用「桌面消息弹窗」的应用内横幅兜底。点本行「功能说明」看完整步骤与「收不到」的排查，点右侧「测试」＝后台弹窗自测：第一段当场体检（开关/权限/保活/后台服务）并真发一条；成功后再点「现在测（切后台）」按 Home 切后台，第二段会由页面在后台再发一条、回来给结论。<b>⚠ 后台弹窗跟着保活一起：保活被截断/页面被丢弃＝后台弹窗一起停摆</b>（别的 App 刷视频、听歌占用音频；挂后台太久被系统冻结——见上方红字）；失效后彻底关闭网页重新打开，再把两个开关重新打开。<b>还有一条最容易漏：手机开了勿扰 / 免打扰（iPhone 叫「专注模式」）时，通知被系统静默收进通知栏、屏幕上方不弹横幅</b>——网页读不到它，「测试」体检全绿你也可能什么都没看到；先下拉通知栏看那条测试通知在不在，在＝被系统压住（去系统设置关掉勿扰，或把本浏览器 / 桌面上的 KaKaShi 加进勿扰的允许例外）。</div>
         <!-- #1059：通知逐条弹（关闭内容去重）——用户直派「联系人发来的多条消息我都要看到弹窗」。
              默认关闭＝保持去重（同内容/近期弹过只弹一条）；打开后每条消息都单独弹系统通知。 -->
         <div class="gs-row"><span>通知逐条弹（关闭去重）</span><label class="toggle"><input type="checkbox" id="bg-notify-nodedup"><span class="tk"></span></label></div>
@@ -11440,7 +11604,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
         </div>
         <!-- v3.26.x #185：顶部避让修正——「系统保留/覆盖」两形态 JS 无法区分（信号相同），
              不同机型各属其一：开启=声明本机为覆盖形态（恢复 env 顶部避让+全屏高度含 env），
-             修「Mochi 行与系统时间重叠」；默认关=系统保留形态（修「底部白带」）。
+             修「KaKaShi 行与系统时间重叠」；默认关=系统保留形态（修「底部白带」）。
              #978：本项真实门槛是「添加到主屏幕后的独立应用形态」（执行器 forceCover 的
              standalone 就是 ios-pwa-standalone 类），不是「iPhone」这个平台——iPhone 用
              Safari 直接打开时开关同样无效，故撤掉静态「仅 iPhone」胶囊，改由 JS 按形态提示。
@@ -11450,7 +11614,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
              夹在那里既藏又混类目。行 id／开关 id 一字未动＝settings-help 功能说明胶囊、
              personalize.js 的形态判定与「去调整」跳转、device.js 的读写与哨兵全部照旧。 -->
         <div class="set-row">
-          <div class="txt">顶部避让修正<span class="sub">只在「添加到主屏幕」后打开（iPhone / iPad 独立应用形态）才有意义；顶部 Mochi 行与手机时间重叠时建议开启，底部出现白带时关闭（改后自动刷新）。浏览器里直接打开时本开关无效果，安卓请用「屏幕适配微调」</span></div>
+          <div class="txt">顶部避让修正<span class="sub">只在「添加到主屏幕」后打开（iPhone / iPad 独立应用形态）才有意义；顶部 KaKaShi 行与手机时间重叠时建议开启，底部出现白带时关闭（改后自动刷新）。浏览器里直接打开时本开关无效果，安卓请用「屏幕适配微调」</span></div>
           <label class="toggle"><input type="checkbox" id="safe-top-force"><span class="tk"></span></label>
         </div>
       </div><!-- /set-group tools · safe-top-force -->
@@ -11617,7 +11781,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
       <!-- #959（2026-09-21 用户直派「这个要写在关于里提醒 iOS 用户」）：iPhone/iPad Safari 7 天清空规则单列一条。
            仅 iOS 显示——pwa.js 载入时对非 iOS 置 hidden（JS 未跑＝保留，宁可多提醒一句，不误藏）。
            非 set-row＝设置搜索不受影响（同 #722/#792 口径）。 -->
-      <div class="set-alert" id="about-ios-pwa-note"><b>iPhone / iPad（Safari）用户必看：不装到桌面，数据会被「7 天规则」清空。</b>没把本站「添加到主屏幕」时，Apple 会在<b>连续 7 天没打开本站</b>后自动清空它的全部本地数据——这是 Safari 的隐私策略（ITP），任何网站都躲不过，网站也没法用代码阻止；<b>添加到主屏幕后从桌面图标打开就不受这条限制</b>（主屏应用不计入这 7 天）。<b>注意：主屏幕应用和 Safari 是两套独立存储</b>，所以请按顺序做：① 先导出一份完整备份（设置 → 通用 → 导出数据），存到「文件」App 或微信收藏；② 点 Safari 底部的分享按钮（方框加箭头）→「添加到主屏幕」→ 添加；③ 回手机桌面，点新出现的 Mochi 图标打开；④ 在打开的桌面应用里 设置 → 通用 → 导入数据，选第①步的备份文件恢复。之后平时都从桌面图标用，Safari 清不清都不影响你的数据。（安卓没有这条 7 天规则，但存储紧张时系统也会清网页数据，仍要定期导出备份。）</div>
+      <div class="set-alert" id="about-ios-pwa-note"><b>iPhone / iPad（Safari）用户必看：不装到桌面，数据会被「7 天规则」清空。</b>没把本站「添加到主屏幕」时，Apple 会在<b>连续 7 天没打开本站</b>后自动清空它的全部本地数据——这是 Safari 的隐私策略（ITP），任何网站都躲不过，网站也没法用代码阻止；<b>添加到主屏幕后从桌面图标打开就不受这条限制</b>（主屏应用不计入这 7 天）。<b>注意：主屏幕应用和 Safari 是两套独立存储</b>，所以请按顺序做：① 先导出一份完整备份（设置 → 通用 → 导出数据），存到「文件」App 或微信收藏；② 点 Safari 底部的分享按钮（方框加箭头）→「添加到主屏幕」→ 添加；③ 回手机桌面，点新出现的 KaKaShi 图标打开；④ 在打开的桌面应用里 设置 → 通用 → 导入数据，选第①步的备份文件恢复。之后平时都从桌面图标用，Safari 清不清都不影响你的数据。（安卓没有这条 7 天规则，但存储紧张时系统也会清网页数据，仍要定期导出备份。）</div>
       <!-- #1370（2026-09-28 用户直派「需要在使用说明和功能里说明 手机需要关省电模式之类的防止卡顿」）：这条警示条现在讲两件事——
            ①省电模式把整机调半速（#884 原口径）；②「另一种卡」＝系统省电/后台管控把网页收回（表现＝切回来白一下、页面自己重载）。
            同一套「回收」口径写在：使用说明第 10 节（前提 5＋挂久失效那两条）、第 11 节（新增三条）、第 12 节保活条、
@@ -11757,11 +11921,11 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
         </div>
       </div>
       </div><!-- /them-sec about -->
-      <div class="ver">Mochi 字卡传讯 v8.69</div>
+      <div class="ver">KaKaShi 字卡传讯 v8.69</div>
       <div class="ver-credit">原版小红书@言序（1842523578）</div>
       <!-- v3.27.x：设置页底部防骗声明 -->
       <div class="set-alert">
-        <b>Mochi字卡网站免费。</b>作者只有两个账号：小红书@言序（1842523578）和抖音@言序（58334080131）；作者以前不常看抖音、一般不回消息（最近开始看），是看到有人想花钱求网站才开的号，主要用于发布本站链接。本站不收取任何费用，如有出现任何收费情况，均为诈骗，注意防止被骗。<b>2026.10.30 起本站禁止二传链接：本站链接与代码库链接都只能从作者本人主页获取，任何形式的传播（公开平台、群聊、私发他人）都算二传。</b>截图、分享网站里的聊天记录属于正常使用，随意；把字卡内容整理打包发到别处仍须标注作者署名：小红书 @言序（1842523578），禁止删除或修改；严禁收费倒卖本站链接、安装包——如果你是花钱买来的链接：你被骗了，请拒付退款并举报卖家。
+        <b>KaKaShi字卡网站免费。</b>作者只有两个账号：小红书@言序（1842523578）和抖音@言序（58334080131）；作者以前不常看抖音、一般不回消息（最近开始看），是看到有人想花钱求网站才开的号，主要用于发布本站链接。本站不收取任何费用，如有出现任何收费情况，均为诈骗，注意防止被骗。<b>2026.10.30 起本站禁止二传链接：本站链接与代码库链接都只能从作者本人主页获取，任何形式的传播（公开平台、群聊、私发他人）都算二传。</b>截图、分享网站里的聊天记录属于正常使用，随意；把字卡内容整理打包发到别处仍须标注作者署名：小红书 @言序（1842523578），禁止删除或修改；严禁收费倒卖本站链接、安装包——如果你是花钱买来的链接：你被骗了，请拒付退款并举报卖家。
       </div>
     </div>
 
@@ -12154,7 +12318,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
         <div class="cal-card glass">
           <div class="lic-hero">
             <div class="lic-hero-top">
-              <div class="lic-title">Mochi 字卡传讯</div>
+              <div class="lic-title">KaKaShi 字卡传讯</div>
               <span class="lic-badge">原版</span>
               <span class="lic-ver">v8.69</span>
             </div>
@@ -12287,7 +12451,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
           <div class="lic-li">发出的红包约 80% 概率被领取并致谢，24 小时未领取自动退回；长按可退回待领红包；被领取后 TA 还有概率再捎一句（我领 TA 的、TA 领我的都算；默认开启、默认 60%，开关 / 概率 / 「捎什么内容」三档都在聊天页红包的「设置」里，按每个联系人单独保存）</div>
           <div class="lic-li">TA 平时也会主动发红包（每天最多 5 次），七夕更爱发大额</div>
           <div class="lic-li">余额不足也能照发照买：直接透支成负数不拦截，后续收红包 / 申请回正</div>
-          <div class="lic-li">「向 Mochi 申请心意币」：点击任意余额行弹出，可给我和 TA 双向充值入账；TA 也会随机向 Mochi 申请并在聊天留下申请记录——申请概率与每日上限在聊天页红包的「设置」里按每个联系人单独调整（默认 4%、不限次数）</div>
+          <div class="lic-li">「向 KaKaShi 申请心意币」：点击任意余额行弹出，可给我和 TA 双向充值入账；TA 也会随机向 KaKaShi 申请并在聊天留下申请记录——申请概率与每日上限在聊天页红包的「设置」里按每个联系人单独调整（默认 4%、不限次数）</div>
           <div class="lic-li">心意市集：340+ 件默认商品分 15 类（含药品医护：常备药 / 外伤处理 / 经期关怀，以及节日节令、美妆个护；节日有粽子汤圆月饼，家里有口红面膜暖宝宝），支持搜索、自建商品（名字 / 图片 / 价格 / 默认留言）、编辑与恢复默认商品；TA 逛市集时会把想要的加进自己的心愿单，并按概率把这份心愿发一张卡片到聊天——点卡片上的【送 TA】即可一键买下送出（默认开启、默认 60%，概率与开关在「心意集市和心意柜设置」里）</div>
           <div class="lic-li"><b>心意市集·上传我的商品</b>：市集顶部的【＋ 上传我的商品】——用自己的照片当礼物（不传图就用 emoji），填上名字、价格、分类和一句默认留言就能存进市集，自己送、TA 送、加心愿单都跟默认商品一样能用。同一块里还有【导出商品数据】和【导入商品数据】：导出是一份 json 文件（你上传的图片一起打包），换手机、换浏览器或搬到另一个桌面，选这个文件导入即可还原；同一件商品（名字/分类/价格/图片都一样）会自动跳过，反复导入也不会翻倍。导出只装你自己上传的商品——默认商品、对默认商品的修改与删除、心意币、心愿单、心意柜记录都不包含、也不会被改动；导入时可选「合并」（已有的保留、缺的补上）或「先清空我的商品再导入」，文件里格式不对的条目会被忽略并在提示里说明跳过了几件</div>
           <div class="lic-li">送礼给 TA：挑商品写心意留言送出，礼物卡片飞进聊天并同步存进心意柜；TA 每天 5% 概率主动从市集挑礼物回礼（最多 3 次）；反过来我送出的每一份礼物（含心愿卡上点【送 TA】）都有概率换 TA 回一句——默认开启、默认 60%，「TA 回什么」可切系统预设话术 / 像正常聊天一样回复 / 混合，开关与概率都在「心意集市和心意柜设置」里</div>
@@ -12847,7 +13011,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
               <div class="lic-li"><b>收不到 ① iPhone / iPad</b>：<b>Safari 标签页里没有网页通知能力</b>，所以这个开关在浏览器里开不起来（不是网站坏了）。要 <b>Safari 分享菜单 →「添加到主屏幕」</b>，之后从桌面图标打开本站——那边能授权、能弹系统通知（本机读「通知=已允许」就是这个形态）。装在 iPhone 上也仍要靠「后台保活」把页面撑住：iOS 不给网页推送服务端，应用被系统收回后不保证弹。兜底：<b>设置 → 系统 →「桌面消息弹窗」</b>，不在聊天页时新消息弹应用内横幅，切回应用时还会提示「你不在的时候收到 N 条新消息」。</div>
               <div class="lic-li"><b>收不到 ② 后台本来就没消息</b>：TA 的聊天消息是按 <b>回复设置 → 主动发送</b> 的「间隔 + 概率」随机产生的。关掉「主动发送」、概率调成 0、或开着<b>「免打扰」</b>（那是本应用自己的档位，把主动发送弱化到最长 3 小时一次），后台就没有东西可弹（这与通知权限无关）；开着<b>「夜间免打扰模式」</b>（原「夜间模式」）时 22:00–7:00 整段不主动发消息，<b>后半夜本来就没有可弹的东西</b>——这些都属设定，不是坏了。</div>
               <div class="lic-li"><b>收不到 ③ 被去重闸门拦了</b>：刚切到后台的 <b>15 秒内</b>不发通知（多半是你刚看完的消息在补触发）；内容上也会去重——与最近 5 分钟聊过、最近 2 分钟弹过、或你刚在前台看过的同一条内容不再重复弹。TA 的字卡池重复率高，同一句被吞掉属正常，不是坏了。</div>
-              <div class="lic-li"><b>收不到 ④ 手机开了「勿扰 / 免打扰」</b>（系统把横幅压住了）：这是最容易漏、也最常命中的一条。手机的<b>勿扰模式</b>（安卓叫「勿扰 / 免打扰」，iPhone / iPad 是<b>「专注模式」</b>里的勿扰·睡眠·驾驶·工作）会把<b>所有应用</b>的通知<b>静默收进通知栏</b>——屏幕上方不弹横幅、不亮屏、不响铃。它整个发生在系统那一层，<b>网页读不到它的状态</b>，所以会出现「测试体检全绿、通知确实发出去了，你屏幕上却什么都没有」——<b>体检绿 + 你没看到，先查这条</b>。两种情形：自己手动开的，或<b>定时 / 自动开着</b>（夜里到早上那一段自动开、白天忘了关）。<b>一步自查</b>：下拉通知栏，看刚才那条测试通知<b>在不在里面</b>——<b>躺在通知栏、只是没在屏幕上方弹</b>＝被系统压住了，不是链路坏了：去 系统设置 → 通知 → 勿扰 / 免打扰 关掉（iPhone：控制中心 → 点掉当前专注模式），或在勿扰设置里把本浏览器（或桌面上的 Mochi）加进<b>「允许的应用 / 例外」</b>。<b>同一族还有三处会压住横幅</b>：① 通知<b>按类别被静音过</b>——长按某条通知选过「静默 / 减少干扰」，部分新系统还会把不常用的应用自动折进「静默通知」，浏览器那一类里的<b>「网站通知」</b>单独关掉＝总开关开着也不弹；② <b>锁屏显示</b>设成「隐藏通知内容 / 不显示」，于是锁屏上看不见、只有解锁后通知栏里才有；③ iPhone 开过<b>「定时推送摘要」</b>，通知会攒到你指定的时间点才一起出现。电脑端同理：Windows 的<b>「请勿打扰 / 专注助手」</b>、macOS 的<b>「专注模式」</b>开着时也不弹横幅。<b>别和本站自己的两个档搞混</b>：回复设置里的「免打扰」与「夜间免打扰模式」管的是<b>有没有消息可弹</b>，本条说的手机系统勿扰管的是<b>有消息也弹不出来</b>——它在手机系统设置里，网页读不到它的状态、也替你关不掉。</div>
+              <div class="lic-li"><b>收不到 ④ 手机开了「勿扰 / 免打扰」</b>（系统把横幅压住了）：这是最容易漏、也最常命中的一条。手机的<b>勿扰模式</b>（安卓叫「勿扰 / 免打扰」，iPhone / iPad 是<b>「专注模式」</b>里的勿扰·睡眠·驾驶·工作）会把<b>所有应用</b>的通知<b>静默收进通知栏</b>——屏幕上方不弹横幅、不亮屏、不响铃。它整个发生在系统那一层，<b>网页读不到它的状态</b>，所以会出现「测试体检全绿、通知确实发出去了，你屏幕上却什么都没有」——<b>体检绿 + 你没看到，先查这条</b>。两种情形：自己手动开的，或<b>定时 / 自动开着</b>（夜里到早上那一段自动开、白天忘了关）。<b>一步自查</b>：下拉通知栏，看刚才那条测试通知<b>在不在里面</b>——<b>躺在通知栏、只是没在屏幕上方弹</b>＝被系统压住了，不是链路坏了：去 系统设置 → 通知 → 勿扰 / 免打扰 关掉（iPhone：控制中心 → 点掉当前专注模式），或在勿扰设置里把本浏览器（或桌面上的 KaKaShi）加进<b>「允许的应用 / 例外」</b>。<b>同一族还有三处会压住横幅</b>：① 通知<b>按类别被静音过</b>——长按某条通知选过「静默 / 减少干扰」，部分新系统还会把不常用的应用自动折进「静默通知」，浏览器那一类里的<b>「网站通知」</b>单独关掉＝总开关开着也不弹；② <b>锁屏显示</b>设成「隐藏通知内容 / 不显示」，于是锁屏上看不见、只有解锁后通知栏里才有；③ iPhone 开过<b>「定时推送摘要」</b>，通知会攒到你指定的时间点才一起出现。电脑端同理：Windows 的<b>「请勿打扰 / 专注助手」</b>、macOS 的<b>「专注模式」</b>开着时也不弹横幅。<b>别和本站自己的两个档搞混</b>：回复设置里的「免打扰」与「夜间免打扰模式」管的是<b>有没有消息可弹</b>，本条说的手机系统勿扰管的是<b>有消息也弹不出来</b>——它在手机系统设置里，网页读不到它的状态、也替你关不掉。</div>
               <div class="lic-li"><b>和「离线消息提醒」的区别</b>：两者完全独立、互不影响。后台弹窗＝<b>页面还在后台运行时</b> TA 发消息弹通知（本开关 + 后台保活 + 通知权限）；离线消息提醒＝<b>页面全部关掉后</b>浏览器隔几小时唤醒一次、随机抽一条想念文案弹通知（仅安卓 / 电脑上的 Chrome、Edge 且添加到主屏幕）。哪个不开都不影响另一个。</div>
               <div class="lic-li"><b>代价</b>：开着后台保活＝页面在后台持续运行，比较耗电、也可能发热，不需要时到 设置 → 系统 关掉；通知会在锁屏 / 通知栏显示消息内容，介意就在系统设置里关掉本应用的通知。</div>
               <div class="lic-li"><b>一句话路径</b>：安卓或电脑上的 Chrome / Edge 打开本站 → 允许通知 → 设置 → 系统 打开「后台通知」（自动带上「后台保活」）→ 去系统设置给浏览器开通知、且不限制后台 → 点「测试」看到横幅即成功。</div>
@@ -12878,7 +13042,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
               <div class="lic-li"><b>优化 ⑧ 安卓用法</b>：同样的东西，安卓一般不会被系统关掉页面，但数据还是会一直涨，<b>长期用也要定期清</b>（照 ①② 做）。另外别用「桌面版网站」模式，手机版更流畅；识别失手时用 设置 → 系统 →「<b>手机布局（强制）</b>」掰回来（也可用地址栏 <b>?mobile=1 / ?pc=1</b>）。</div>
               <div class="lic-li"><b>优化 ⑨ 保持最新版</b>：更新会自动进行（切后台/重开时生效），也可到 设置 → 关于 →「检查更新」手动刷。</div>
               <div class="lic-li"><b>不是让你少存图</b>：现在上传的字卡图会自动压到<b>最长边 720px</b>（表情包 480、头像 256），比以前的旧图小得多——<b>正常存、正常用完全不用担心</b>。真正拖慢手机的是两类老东西：以前没有压缩标准时存下的<b>老图</b>，和只进不出的<b>历史数据</b>（聊天记录、本地音乐、用不上的大图卡）。把这两类清掉就够了。要铺满屏幕的壁纸会保留大尺寸（最长边 2880px），但一台桌面也就一两张，不会堆起来。</div>
-              <div class="lic-li"><b>还有一类「卡」不是数据多，是手机把网页收回了</b>：表现＝切回来先白一下、「刚才的页面自己重新加载了」、TA 的消息和后台弹窗有一截没收到、页面越用越容易被丢。这是系统的<b>省电与后台管控</b>在做主（任何网页都拦不住它），而且<b>这一页越重它越爱收</b>。安卓／鸿蒙照这四步勾：① <b>系统设置 → 应用 →（你用的浏览器，或已加到桌面的「Mochi」图标）→ 省电 / 电池策略 → 选「无限制 / 允许后台活动」</b>，别让它「优化」这个应用；② 在<b>最近任务</b>里把本站<b>上滑锁定 / 点锁头</b>，<b>不要横向划掉它</b>（划掉＝你亲手关掉，回来必然重新加载）；③ 有「<b>自启动 / 后台活动</b>」开关的一并允许；④ 荣耀·华为、小米、OPPO·一加、vivo 的菜单<b>叫法各不相同</b>（省电策略 / 电池优化 / 后台管理 / 关联启动），找不到就在系统设置里直接搜「电池」「省电」「后台」。</div>
+              <div class="lic-li"><b>还有一类「卡」不是数据多，是手机把网页收回了</b>：表现＝切回来先白一下、「刚才的页面自己重新加载了」、TA 的消息和后台弹窗有一截没收到、页面越用越容易被丢。这是系统的<b>省电与后台管控</b>在做主（任何网页都拦不住它），而且<b>这一页越重它越爱收</b>。安卓／鸿蒙照这四步勾：① <b>系统设置 → 应用 →（你用的浏览器，或已加到桌面的「KaKaShi」图标）→ 省电 / 电池策略 → 选「无限制 / 允许后台活动」</b>，别让它「优化」这个应用；② 在<b>最近任务</b>里把本站<b>上滑锁定 / 点锁头</b>，<b>不要横向划掉它</b>（划掉＝你亲手关掉，回来必然重新加载）；③ 有「<b>自启动 / 后台活动</b>」开关的一并允许；④ 荣耀·华为、小米、OPPO·一加、vivo 的菜单<b>叫法各不相同</b>（省电策略 / 电池优化 / 后台管理 / 关联启动），找不到就在系统设置里直接搜「电池」「省电」「后台」。</div>
               <div class="lic-li"><b>一个容易白忙活的地方</b>：Edge 的「睡眠标签页」、Chrome 的「内存节省程序」管的是<b>浏览器里的标签页</b>。把本站「添加到主屏幕 / 桌面」之后，它是一个<b>独立应用</b>——<b>去改那两处没有用</b>，该被收回还是被收回。真正管用的是上面那条里的<b>系统省电 / 允许后台活动</b>。</div>
               <div class="lic-li"><b>iPhone 侧对应做两件事</b>：① 用 Safari 把本站「添加到主屏幕」，并<b>从桌面图标打开</b>（不装的话 Apple 的「<b>7 天规则</b>」会把整个站的数据清空，见关于页那条）；② <b>别开「低电量模式」</b>（它把整机帧率锁到一半，滑动、切页、打字全都卡，关掉立刻恢复）。另外<b>页面越轻越不容易被收回</b>：按上面的顺序清掉最大的一项；<b>设置 → 信息诊断</b>里的「被系统回收过 N 次」就是这件事的计数，它一直涨就去勾上面那几条。</div>
               <div class="lic-li"><b>千万别做</b>：<b>不要用「清除本地数据」来治卡顿</b>——它不会修好任何东西，只会把数据全删光（聊天 / 字卡 / 头像 / 壁纸 / 音乐）。真要清，先到「导出数据」备份。</div>
@@ -12909,7 +13073,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
               <div class="lic-li"><b>「数据怎么丢了」其实开的是另一个入口</b>：浏览器标签页 与「添加到主屏幕 / 安装」后的独立应用<b>可能各用一套存储</b>（安卓 Edge 尤其如此），两边数据看起来不一样。安装前先「导出数据」、装好后再「导入数据」；两边<b>不要同时打开</b>使用。</div>
               <div class="lic-li"><b>页面变形 / 布局不对</b>：浏览器的「桌面版网站」模式会把设备伪装成电脑（UA、屏幕尺寸、触摸能力全变），识别可能失手。用 设置 → 系统 →「<b>手机布局（强制）</b>」掰回来（或地址栏加 <b>?mobile=1</b> 强开手机布局、<b>?pc=1</b> 强开电脑布局）。</div>
               <div class="lic-li"><b>保活 / 通知被系统悄悄杀掉</b>：系统省电、后台清理、长时间不用都会杀掉后台页面，表现为「以前好好的，现在不弹了」。到<b>系统设置 → 应用 → 该浏览器 → 省电 / 电池策略</b>里选「<b>无限制 / 允许后台活动</b>」，在<b>最近任务</b>里把本站<b>锁定</b>、别横向划掉，然后回本页把开关重新打开一次。<b>关 Edge「睡眠标签页」/ Chrome「内存节省程序」对已加到桌面的本站没有用</b>——那两个只管浏览器标签页（详见第 11 节）。</div>
-              <div class="lic-li"><b>顶部空白 / 底部白带</b>：iOS 安全区（刘海、底部横条）与全屏模拟状态栏的高度在不同机型上会打架。iOS 上出现顶部「Mochi」行与系统时间重叠时，开「<b>顶部避让修正</b>」（设置 → 工具，就在「屏幕适配微调」下面）；底部出现白带则把它关回。</div>
+              <div class="lic-li"><b>顶部空白 / 底部白带</b>：iOS 安全区（刘海、底部横条）与全屏模拟状态栏的高度在不同机型上会打架。iOS 上出现顶部「KaKaShi」行与系统时间重叠时，开「<b>顶部避让修正</b>」（设置 → 工具，就在「屏幕适配微调」下面）；底部出现白带则把它关回。</div>
             </div>
           </details>
           <details class="lic-grp">
@@ -12988,6 +13152,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
         <button class="fav-tab" data-rp="feed">朋友圈</button>
         <button class="fav-tab" data-rp="ck">查岗</button>
         <button class="fav-tab" data-rp="other">其他</button>
+        <button class="fav-tab" data-rp="diary">日记</button>
       </div>
       <!-- v3.27.x #218 互动频率引导：进页先讲清「这些都是随机概率、可自行调」，配合聊天页提示条 -->
       <div class="gs-sub reply-guide-note">以下都是 TA 随机行为的触发概率（%）：嫌频繁就把数值调小，调到 0 = 不再触发；开关关掉 = 彻底关闭该行为。修改即时保存生效。</div>
@@ -13392,6 +13557,63 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
             <div class="gs-row"><span>工作值累计</span><label class="toggle"><input type="checkbox" id="work-en"><span class="tk"></span></label></div>
           </div>
           <div class="gs-sub" style="padding:0 14px 14px">桌面摸鱼小组件两组数值的增长总开关（默认开）。关闭「摸鱼值累计」后：TA 的自动摸鱼、你点摸鱼按钮、番茄钟补偿摸鱼、抓包奖励都不再涨摸鱼值；关闭「工作值累计」后：自动打工、专注期间的工作值等不再涨。已有数值保留不清零，重新打开即恢复累计，各联系人独立保存</div>
+        </div>
+        <div class="gs-panel" data-rpanel="diary" hidden>
+          <div class="gs-title">梦角写日记</div>
+          <div class="set-group glass">
+            <div class="gs-row"><span>梦角主动写日记</span><label class="toggle"><input type="checkbox" id="diary-ta-write-en"><span class="tk"></span></label></div>
+            <div class="gs-row"><span>每天最多写日记（篇）</span><div class="stepper" data-k="diary-ta-write-daily-max" data-min="1" data-max="10" data-step="1"><button class="stp-min">−</button><input class="stp-val" id="diary-ta-write-daily-max-val" readonly><button class="stp-max">+</button></div></div>
+            <div class="gs-row"><span>主动写日记概率</span><div class="stepper" data-k="diary-ta-write-prob" data-min="1" data-max="100" data-step="5"><button class="stp-min">−</button><input class="stp-val" id="diary-ta-write-prob-val" readonly><button class="stp-max">+</button></div></div>
+            <div class="gs-row"><span>最短写日记时间（分钟）</span><div class="stepper" data-k="diary-ta-write-min" data-min="1" data-max="1440" data-step="1"><button class="stp-min">−</button><input class="stp-val" id="diary-ta-write-min-val" readonly><button class="stp-max">+</button></div></div>
+            <div class="gs-row"><span>最长写日记时间（分钟）</span><div class="stepper" data-k="diary-ta-write-max" data-min="1" data-max="1440" data-step="60"><button class="stp-min">−</button><input class="stp-val" id="diary-ta-write-max-val" readonly><button class="stp-max">+</button></div></div>
+          </div>
+          <div class="gs-title">日记内容</div>
+          <div class="set-group glass">
+            <div class="gs-row"><span>最少字卡条数</span><div class="stepper" data-k="diary-ta-min-cards" data-min="1" data-max="500" data-step="10"><button class="stp-min">−</button><input class="stp-val" id="diary-ta-min-cards-val" readonly><button class="stp-max">+</button></div></div>
+            <div class="gs-row"><span>最多字卡条数</span><div class="stepper" data-k="diary-ta-max-cards" data-min="1" data-max="500" data-step="10"><button class="stp-min">−</button><input class="stp-val" id="diary-ta-max-cards-val" readonly><button class="stp-max">+</button></div></div>
+            <div class="gs-row"><span>日记拼接随机标点</span><label class="toggle"><input type="checkbox" id="diary-ta-punct-en"><span class="tk"></span></label></div>
+          </div>
+          <div class="gs-title">日记内容类型</div>
+          <div class="set-group glass">
+            <div class="gs-row"><span>日记内容使用颜文字</span><label class="toggle"><input type="checkbox" id="diary-ta-kaomoji-en"><span class="tk"></span></label></div>
+            <div class="gs-row"><span>日记内容使用 emoji</span><label class="toggle"><input type="checkbox" id="diary-ta-emoji-en"><span class="tk"></span></label></div>
+          </div>
+          <div class="gs-title">梦角看我日记</div>
+          <div class="set-group glass">
+            <div class="gs-row"><span>梦角看我日记概率</span><div class="stepper" data-k="diary-ta-read-prob" data-min="0" data-max="100" data-step="5"><button class="stp-min">−</button><input class="stp-val" id="diary-ta-read-prob-val" readonly><button class="stp-max">+</button></div></div>
+          </div>
+          <div class="gs-sub" style="padding:0 14px 14px">控制梦角能看到你日记的概率（仅对写日记时勾选「允许梦角查看」的日记生效）。设为 0 则梦角永远看不到你的日记。</div>
+          <div class="gs-title">写日记内容</div>
+          <div class="set-group glass">
+            <div class="gs-row" style="flex-direction:column;align-items:stretch;gap:8px">
+              <span style="font-size:13px;color:var(--ink-soft,#888)">内容（可选，输入额外要求或背景设定）</span>
+              <textarea id="diary-ta-content" class="modal-textarea" rows="3" placeholder="例如：今天去了公园，心情很好…" style="width:100%;box-sizing:border-box;font-size:13px"></textarea>
+            </div>
+          </div>
+          <div class="gs-title">内容类型</div>
+          <div class="set-group glass">
+            <div class="diary-type-chips" id="diary-type-chips">
+              <div class="diary-type-chip sel" data-type="random">随机</div>
+              <div class="diary-type-chip" data-type="scenery">风景/天气</div>
+              <div class="diary-type-chip" data-type="movie">影视</div>
+              <div class="diary-type-chip" data-type="music">音乐</div>
+              <div class="diary-type-chip" data-type="mood">心事</div>
+              <div class="diary-type-chip" data-type="fun">趣闻</div>
+              <div class="diary-type-chip" data-type="work">学习/工作</div>
+              <div class="diary-type-chip" data-type="star">追星</div>
+              <div class="diary-type-chip" data-type="dream">梦境</div>
+              <div class="diary-type-chip" data-type="daily">小事</div>
+              <div class="diary-type-chip" data-type="recommend">推荐</div>
+              <div class="diary-type-chip" data-type="festival">节气/节日</div>
+              <div class="diary-type-chip" data-type="birthday">生日/纪念日</div>
+              <div class="diary-type-chip" data-type="thanks">感谢/祝福</div>
+              <div class="diary-type-chip" data-type="sorry">道歉</div>
+              <div class="diary-type-chip" data-type="feeling">情感倾诉</div>
+              <div class="diary-type-chip" data-type="sick">生病关心</div>
+              <div class="diary-type-chip" data-type="cute">撒娇</div>
+            </div>
+          </div>
+          <div class="gs-sub" style="padding:0 14px 14px">选择梦角写日记的内容类型。选择「随机」则从所有类型中随机抽取。</div>
         </div>
         <!-- v3.6.x：保存设置按钮——点击把当前所有概率/开关写入本地并提示 -->
         <button class="ta-add-btn gs-save-btn" id="reply-save-btn" style="width:100%;margin:6px 0 10px">
@@ -15729,7 +15951,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
           </div>
           <div class="rp-settings-title">TA 申请心意币</div>
           <div class="set-row" id="cs-rp-ask-prob">
-            <div class="txt">TA 申请心意币概率<span class="sub">联系人有概率向 Mochi 申请一笔心意币（记进聊天申请记录），每个联系人可单独设置</span></div>
+            <div class="txt">TA 申请心意币概率<span class="sub">联系人有概率向 KaKaShi 申请一笔心意币（记进聊天申请记录），每个联系人可单独设置</span></div>
             <div class="val" id="cs-rp-ask-prob-val">4%</div>
           </div>
           <div class="set-row" id="cs-rp-ask-daily-max">
@@ -16149,6 +16371,112 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
           <div class="mood-curve" id="mood-curve"></div>
           <div class="mood-month-grid" id="mood-month-grid"></div>
           <div class="mood-month-stats" id="mood-month-stats"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 日记（第三+四阶段：双方写日记 + Tab切换 + 设置面板 + 手账美化） -->
+    <div class="page" id="page-diary" hidden>
+      <div class="chat-head">
+        <span class="ch-back" id="diary-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </span>
+        <span class="ch-name" id="diary-title">日记</span>
+        <div class="diary-settings-wrap">
+          <span class="ch-settings" id="diary-settings-btn" title="日记设置" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-controls="diary-settings-menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </span>
+          <div class="diary-settings-menu" id="diary-settings-menu" role="menu" hidden>
+            <button type="button" id="diary-menu-settings" role="menuitem">原有设置面板</button>
+            <button type="button" id="diary-menu-export" role="menuitem">导出备份</button>
+            <button type="button" id="diary-menu-import" role="menuitem">导入备份</button>
+          </div>
+        </div>
+      </div>
+      <div class="cal-scroll" id="diary-scroll">
+        <!-- Tab 切换 -->
+        <div class="diary-tabs" id="diary-tabs">
+          <button class="diary-tab active" data-dtab="mine">我的日记</button>
+          <button class="diary-tab" data-dtab="ta">梦角日记</button>
+        </div>
+        <!-- 提醒提示 -->
+        <div class="diary-reminder" id="diary-reminder" hidden>
+          <span class="diary-reminder-text" id="diary-reminder-text"></span>
+          <button class="diary-reminder-close" id="diary-reminder-close">&times;</button>
+        </div>
+        <!-- 统计区域 -->
+        <div class="diary-stats" id="diary-stats">
+          <div class="diary-stat-tag diary-stat-mine">本月我写了 <b id="diary-stat-month-mine">0</b> 篇</div>
+          <div class="diary-stat-tag diary-stat-ta">本月梦角写了 <b id="diary-stat-month-ta">0</b> 篇</div>
+          <div class="diary-stat-tag">连续写日记 <b id="diary-stat-streak">0</b> 天</div>
+          <div class="diary-stat-tag">共写天数 <b id="diary-stat-both">0</b> 天</div>
+        </div>
+        <!-- 日历（可折叠） -->
+        <div class="diary-calendar" id="diary-calendar">
+          <div class="diary-calendar-head" id="diary-cal-toggle">
+            <button class="diary-calendar-nav" id="diary-cal-prev">‹</button>
+            <span class="diary-calendar-title" id="diary-cal-title">2026年11月</span>
+            <button class="diary-calendar-nav" id="diary-cal-next">›</button>
+            <span class="diary-calendar-fold" id="diary-cal-fold">▾</span>
+          </div>
+          <div class="diary-calendar-body" id="diary-cal-body">
+            <div class="diary-calendar-week">
+              <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+            </div>
+            <div class="diary-calendar-grid" id="diary-cal-grid"></div>
+          </div>
+        </div>
+        <!-- 列表视图 -->
+        <div id="diary-list-view">
+          <div class="diary-search-box">
+            <svg class="diary-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" class="diary-search-input" id="diary-search-input" placeholder="搜索日记内容..." autocomplete="off">
+            <button class="diary-search-clear" id="diary-search-clear" hidden>&times;</button>
+          </div>
+          <div class="diary-actions" id="diary-actions-mine">
+            <button class="ta-add-btn" id="diary-new-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:4px"><path d="M12 5v14M5 12h14"/></svg>写日记
+            </button>
+          </div>
+          <div class="diary-list" id="diary-list"></div>
+          <div class="diary-empty" id="diary-empty" hidden>还没有日记，点击上方按钮写下第一篇吧</div>
+        </div>
+        <!-- 编辑视图 -->
+        <div id="diary-edit-view" hidden>
+          <div class="diary-book glass">
+            <div class="diary-book-spine"></div>
+            <div class="diary-page">
+              <div class="diary-page-head">
+                <span class="diary-page-title" id="diary-edit-title">写日记</span>
+                <span class="diary-page-date" id="diary-edit-date"></span>
+              </div>
+              <textarea class="diary-textarea" id="diary-textarea" placeholder="今天想记录什么…" rows="12"></textarea>
+              <div class="diary-edit-visible" id="diary-visible-row">
+                <label class="diary-visible-label"><input type="checkbox" id="diary-visible-cb" checked> 允许梦角查看这篇日记</label>
+              </div>
+              <div class="diary-edit-btns">
+                <button class="modal-btn cancel" id="diary-edit-cancel">取消</button>
+                <button class="modal-btn ok" id="diary-save-btn">保存</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 详情视图 -->
+        <div id="diary-detail-view" hidden>
+          <div class="diary-book glass">
+            <div class="diary-book-spine"></div>
+            <div class="diary-page">
+              <div class="diary-page-head">
+                <span class="diary-page-title">日记详情</span>
+                <span class="diary-page-date" id="diary-detail-date"></span>
+              </div>
+              <div class="diary-detail-body" id="diary-detail-body"></div>
+              <div class="diary-edit-btns">
+                <button class="modal-btn cancel" id="diary-detail-del" style="color:#e05a5a">删除</button>
+                <button class="modal-btn cancel" id="diary-detail-back">返回列表</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -17016,7 +17344,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
   // v3.5.123：readonly 起手（防 Chrome 密码弹条破坏表单签名）——这里立即解除，
   // 早于所有功能模块，任何设备都不会出现输入框不可用的情况
   (function () { var _ci = document.getElementById('chat-input'); if (_ci) _ci.readOnly = false; })();
-window.__jsErrors = window.__jsErrors || []; window.__mochiLoaded = window.__mochiLoaded || []; window.__mochiErrLoaded = window.__mochiErrLoaded || []; window.__mochiBootAt = Date.now(); window.__mochiJsFiles = ["device.js","idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","fav-reason-data.js","fav-reason.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","pwa.js","update-remind.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"]; window.__mochiExtFiles = ["idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","fav-reason-data.js","fav-reason.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","update-remind.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"];
+window.__jsErrors = window.__jsErrors || []; window.__mochiLoaded = window.__mochiLoaded || []; window.__mochiErrLoaded = window.__mochiErrLoaded || []; window.__mochiBootAt = Date.now(); window.__mochiJsFiles = ["device.js","idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","fav-reason-data.js","fav-reason.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","pwa.js","update-remind.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"]; window.__mochiExtFiles = ["idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","fav-reason-data.js","fav-reason.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","update-remind.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"];
 (function () { try {
 (function () {
 try { window.__jsErrors = window.__jsErrors || []; } catch (e0) {}
@@ -17934,7 +18262,7 @@ const L = [];
 const jobs = []; // 所有异步采集（配额/persisted/远端版本/SW 状态）进这里，最后 Promise.all
 let ver = verCache || '', localTs = localTsCache || 0;
 if (!ver) { try { ver = window.APP_VERSION || ''; } catch (e) {} }
-L.push('Mochi 诊断信息（' + ver + '）');
+L.push('KaKaShi 诊断信息（' + ver + '）');
 L.push('时间：' + new Date().toLocaleString() + '（本次启动 ' + BOOT_ID + '#' + BOOT_N + '）');
 L.push('');
 L.push('【结论】');
@@ -19488,7 +19816,7 @@ else if (envTop >= 20) mode = '覆盖形态（页面顶到屏幕最顶，系统�
 else if (diff >= 20) mode = '已避让形态（系统已把网页起点放在状态栏下方，页面不应再加顶部 padding）';
 else mode = '无安全区/常规视口';
 add(true, '顶部形态判定：' + mode, 'env=' + envTop + 'px  var(--mochi-safe-top)=' + varTop + 'px  diff(screen−inner)=' + diff + 'px  判定器=' + Fm.form + '/safeTop=' + Fm.safeTop + '/期望底=' + Fm.expBase + (Fm.iosCover ? '/独立覆盖=1' : ''));
-if (Fm.resStand && !Fm.forceCover) add(true, '歧义形态提示：若顶部 Mochi 行与灵动岛/时间重叠或点不动 → 到 设置→工具 开启【顶部避让修正】开关（自动刷新即修）；若底部白带则保持关闭'); // #1408：该开关自「信息诊断」段搬回「工具」段（作者点名放错位置），本句原写「上方」＝报告在诊断段时把人指去同一屏的上一行，搬走后这句会指空
+if (Fm.resStand && !Fm.forceCover) add(true, '歧义形态提示：若顶部 KaKaShi 行与灵动岛/时间重叠或点不动 → 到 设置→工具 开启【顶部避让修正】开关（自动刷新即修）；若底部白带则保持关闭'); // #1408：该开关自「信息诊断」段搬回「工具」段（作者点名放错位置），本句原写「上方」＝报告在诊断段时把人指去同一屏的上一行，搬走后这句会指空
 if (inp.sbTop == null) add(true, '状态栏隐藏（聊天等全屏页），跳过顶位判定');
 if (inp.sbTop != null) {
 const expect = Fm.expTop;
@@ -21307,7 +21635,7 @@ staticText: '原因：在 Safari 标签页里，Apple 会在连续 7 天没打�
 + '① 先导出一份完整备份（点下方「先导出备份」，存到「文件」App 或微信收藏都行）——主屏幕应用和 Safari 是两套独立存储，不先导出，切过去会看到空数据。\n'
 + '② 点 Safari 底部的「分享」按钮（方框加向上箭头）。\n'
 + '③ 在弹出的菜单里选「添加到主屏幕」→ 右上角「添加」。\n'
-+ '④ 回到手机桌面，点新出现的 Mochi 图标打开。\n'
++ '④ 回到手机桌面，点新出现的 KaKaShi 图标打开。\n'
 + '⑤ 在打开的桌面应用里：设置 → 导入数据，选第①步的备份文件恢复。\n\n'
 + '此后平时都从桌面图标打开，Safari 清不清都不影响你的数据。',
 copyBtn: { label: '先导出备份', fn: function (c) { try { if (window.runBackupExport) window.runBackupExport(); } catch (e) {} try { if (c && c.close) c.close(); } catch (e2) {} } }
@@ -21452,7 +21780,7 @@ const isAndroid = !!d.isAndroid;
 let guide = isIOS
 ? 'iPhone 安装：点底部「分享」按钮 → 「添加到主屏幕」。'
 : isAndroid
-? '安卓安装：点右上角「⋮」菜单 → 「安装应用」。\n若没有该选项：① 确认打开的是最新版 https 页面；② 到手机设置里删除已安装的旧版「Mochi」后重试。'
+? '安卓安装：点右上角「⋮」菜单 → 「安装应用」。\n若没有该选项：① 确认打开的是最新版 https 页面；② 到手机设置里删除已安装的旧版「KaKaShi」后重试。'
 : '电脑安装：点地址栏右侧「安装」图标，或菜单 → 保存并分享 → 安装应用。';
 if (window.openModal) {
 window.openModal('安装到桌面', '', () => {}, { noInput: true, staticText: guide });
@@ -21560,7 +21888,7 @@ if (row) row.click();
 }, 120);
 };
 const iosTab = !!(window.mochiIosTabRisk && window.mochiIosTabRisk());
-window.openModal('欢迎使用 Mochi', '', go, {
+window.openModal('欢迎使用 KaKaShi', '', go, {
 noInput: true,
 staticText: '检测到当前是全新环境，还没有任何数据。\n\n· 如果之前在浏览器标签页里设置过昵称/打卡：点「确定」会打开设置页的数据导入，选择之前导出的备份文件即可全部恢复。'
 + (iosTab ? '\n\n· 如果你之前明明在用、数据却突然不见了：多半是 Safari 清空了本地数据——没添加到主屏幕时，Safari 会在连续 7 天没打开后自动清空。以后请点「分享」→「添加到主屏幕」安装，并从桌面图标打开（安装前先导出备份；主屏幕应用与 Safari 是两套独立存储，需在桌面应用里导入）。' : '')
@@ -21788,6 +22116,7 @@ window.__mochiBootRetry = function () { try { location.reload(); } catch (e) {} 
 <script defer src="js/auction.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('auction.js')"></script>
 <script defer src="js/arcade.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('arcade.js')"></script>
 <script defer src="js/mood-diary.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('mood-diary.js')"></script>
+<script defer src="js/diary.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('diary.js')"></script>
 <script defer src="js/sfx.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('sfx.js')"></script>
 <script defer src="js/fullscreen.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('fullscreen.js')"></script>
 <script defer src="js/data-backup.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('data-backup.js')"></script>

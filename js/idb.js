@@ -1160,6 +1160,7 @@ try { return !!(window.__mochiInteracting && window.__mochiInteracting()); } cat
 }
 let _wrjLanded = null;             // 上一次真的写进 localStorage 的那份序列化串
 function wrjPersistFlush() {
+if (window.__resetting) return;
 if (_wrjPersistT) { clearTimeout(_wrjPersistT); _wrjPersistT = null; }
 _wrjDue = 0; _wrjCap = 0; // #1206 回看/落盘一并作废，下一次排程重新起表
 let s;
@@ -1187,6 +1188,7 @@ let _wrjMarkBuf = new Map(); // 完整标记键 -> t
 let _wrjMarkT = null;
 let _wrjMarkDue = 0, _wrjMarkCap = 0; // #1206 让路用的到期点/硬上限（0＝未排程）
 function wrjMarkFlush() {
+if (window.__resetting) return;
 if (_wrjMarkT) { clearTimeout(_wrjMarkT); _wrjMarkT = null; }
 _wrjMarkDue = 0; _wrjMarkCap = 0;
 if (!_wrjMarkBuf.size) return;

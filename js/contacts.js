@@ -36,6 +36,7 @@ const EXCLUDE = ['contacts', 'active-contact', 'feed-posts', 'migrated-v1', 'js-
 'pomo-cfg', 'pomo-today', 'pomo-total', 'pomo-msgs', 'pomo-send-chat', 'pomo-bell',
 'pomo-companion', 'pomo-companion-log', 'pomo-cmp-usecards',
 'memo-app-items', 'memo-app-send', 'memo-app-global-migrated', 'memo-app-remind',
+'diary-entries', 'diary-ta-last', 'diary-ta-next', 'diary-ta-day', 'diary-ta-new',
 'beauty-schemes', 'chat-beauty-schemes', 'hide-ta-sticker',
 'hide-tab-kaomoji', 'hide-tab-emoji',
 'chat-textcard-direct',

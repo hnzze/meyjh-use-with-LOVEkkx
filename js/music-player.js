@@ -2314,7 +2314,7 @@ const artwork = m.cover ? [{ src: m.cover, sizes: '512x512', type: 'image/jpeg' 
 navigator.mediaSession.metadata = new window.MediaMetadata({
 title: m.name || '未知歌曲',
 artist: m.artist || '未知歌手',
-album: 'Mochi 音乐',
+album: 'KaKaShi 音乐',
 artwork: artwork
 });
 }
@@ -2391,7 +2391,7 @@ el.addEventListener('stalled', function () { if (el !== audio) return; bufferLat
 el.addEventListener('playing', function () { if (el !== audio) return; bufferLatchEl = null; syncPlayIcons(true); });
 el.addEventListener('canplay', function () { if (el !== audio) return; bufferLatchEl = null; syncPlayIcons(!el.paused); });
 el.onplay = function () { if (el !== audio) return; playRejected = false; bgResumeFails = 0; bufferLatchEl = null; clearStallGuard(); disarmAutoResume(); clearBgResume(); bgBrokeAudio = false; wantPlay = true; syncPlayIcons(true); if (m) failMap[m.id] = 0; try { if (navigator.mediaSession) navigator.mediaSession.playbackState = 'playing'; } catch (e) {} try { window.__musicPlaying = true; } catch (e) {} // #700：真播出来＝导入时的「放不了」探测是误报，自愈清除
-if (m && m.probeFail) { try { delete m.probeFail; saveLibrary(); renderLibrary(); } catch (e) {} }; // v3.28.x：每次真正出声都重新绑定歌曲媒体条——后台短暂打断被 bg-keep 接管媒体会话（元数据换成「Mochi 后台保活」）后，恢复播放时若不重设歌曲元数据，通知栏媒体条会停在保活条或直接消失
+if (m && m.probeFail) { try { delete m.probeFail; saveLibrary(); renderLibrary(); } catch (e) {} }; // v3.28.x：每次真正出声都重新绑定歌曲媒体条——后台短暂打断被 bg-keep 接管媒体会话（元数据换成「KaKaShi 后台保活」）后，恢复播放时若不重设歌曲元数据，通知栏媒体条会停在保活条或直接消失
 try { updateMediaSession(true); } catch (e) {} };
 el.onpause = function () { if (el !== audio) return; syncPlayIcons(false); try { if (navigator.mediaSession) navigator.mediaSession.playbackState = (wantPlay && !callHoldPending) ? 'playing' : 'paused'; } catch (e) {} try { window.__musicPlaying = false; } catch (e) {} // v3.28.x：外部打断（还想播）保持 playbackState='playing'，避免 Chrome 把页面当闲置标签冻结、通知栏媒体条消失；仅用户主动暂停才标 'paused'。v3.10.x：非用户暂停（后台省电/音频焦点抢占/系统打断）→ 定时补播反击
 if (wantPlay && !callHoldPending && !taPauseActive) scheduleBgResume(); };

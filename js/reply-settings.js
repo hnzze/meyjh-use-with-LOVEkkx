@@ -1,4 +1,4 @@
-(function () { try {
+﻿(function () { try {
 (function () {
 const uid = window.activePrefix();
 const ls = window.activeStore();
@@ -70,7 +70,12 @@ const DEFAULTS = {
 'gc-cs-normal': 0, 'gc-cs-trigger-name': 1, 'gc-cs-trigger-bar': 0,
 'gc-touch-prob': 5, 'gc-sticker-prob': 10, 'gc-emoji-prob': 5, 'gc-image-prob': 5, 'gc-voice-prob': 10,
 'gc-kaomoji-prob': 5, 'gc-quote-prob': 30, 'gc-rc-prob': 25, 'gc-rc-refix': 35,
-'gc-py-en': 1, 'gc-py-prob': 50, 'gc-py-min': 2, 'gc-py-max': 5
+'gc-py-en': 1, 'gc-py-prob': 50, 'gc-py-min': 2, 'gc-py-max': 5,
+'diary-ta-write-en': 1, 'diary-ta-write-daily-max': 1,
+'diary-ta-write-prob': 30, 'diary-ta-write-min': 1, 'diary-ta-write-max': 120,
+'diary-ta-min-cards': 20, 'diary-ta-max-cards': 50,
+'diary-ta-punct-en': 0, 'diary-ta-kaomoji-en': 0, 'diary-ta-emoji-en': 0,
+'diary-ta-read-prob': 50, 'diary-ta-content': '', 'diary-ta-content-type': 'random'
 };
 function gcRead(k) {
 try {
@@ -104,6 +109,10 @@ function getCfg() {
 const out = {};
 Object.keys(DEFAULTS).forEach(k => {
 const v = k.indexOf('gc-') === 0 ? gcRead(k) : ls.get('reply-' + k);
+if (typeof DEFAULTS[k] === 'string') {
+out[k] = (v === null || v === undefined || v === '') ? DEFAULTS[k] : String(v);
+return;
+}
 let n = (v === null || v === undefined || v === '') ? DEFAULTS[k] : Number(v);
 if (isNaN(n)) {
 n = DEFAULTS[k];
@@ -128,6 +137,10 @@ let s = null;
 try { s = (cid && window.storeForCid) ? window.storeForCid(cid) : (cid && window.storeFor) ? window.storeFor(cid) : ls; } catch (e) { s = ls; }
 Object.keys(DEFAULTS).forEach(k => {
 const v = k.indexOf('gc-') === 0 ? gcRead(k) : (s ? s.get('reply-' + k) : null);
+if (typeof DEFAULTS[k] === 'string') {
+out[k] = (v === null || v === undefined || v === '') ? DEFAULTS[k] : String(v);
+return;
+}
 let n = (v === null || v === undefined || v === '') ? DEFAULTS[k] : Number(v);
 if (isNaN(n)) n = DEFAULTS[k];
 out[k] = n;
@@ -300,13 +313,14 @@ val.value = str;
 val.setAttribute('value', str);
 }
 });
-['py-en', 'py-punct-en', 'as-en', 'dnd-en', 'as-badge', 'as-badge-heart', 'as-badge-star', 'as-badge-moon', 'as-badge-spark', 'as-badge-paw', 'as-badge-rand', 'ml-kaomoji-en', 'ml-emoji-en', 'ml-sticker-en', 'cs-normal', 'cs-trigger-name', 'cs-trigger-bar', 'gc-cs-normal', 'gc-cs-trigger-name', 'gc-cs-trigger-bar', 'gc-py-en', 'ai-rps-en', 'ai-game-en', 'ai-cuddle-en', 'ai-cc-en', 'ckq-en', 'call-resume', 'call-no-hangup', 'ml-write-en', 'ml-fish-week-en', 'ml-punct-en', 'fd-post-en', 'fd-punct-en', 'fd-kaomoji-en', 'fd-emoji-en', 'fd-sticker-en', 'fd-image-en', 'qs-en', 'qs-cc', 'qs-one', 'qs-multi', 'qs-noLimit', 'mjf-en', 'mjf-src-cc', 'mjf-src-def', 'mjf-src-dict', 'mjf-mix', 'mjf-punct', 'rc-en', 'rl-en', 'fish-en', 'work-en', 'fish-grab-en', 'rp-thx-en', 'turn-en', 'gc-turn-en'].forEach(k => {
+['py-en', 'py-punct-en', 'as-en', 'dnd-en', 'as-badge', 'as-badge-heart', 'as-badge-star', 'as-badge-moon', 'as-badge-spark', 'as-badge-paw', 'as-badge-rand', 'ml-kaomoji-en', 'ml-emoji-en', 'ml-sticker-en', 'cs-normal', 'cs-trigger-name', 'cs-trigger-bar', 'gc-cs-normal', 'gc-cs-trigger-name', 'gc-cs-trigger-bar', 'gc-py-en', 'ai-rps-en', 'ai-game-en', 'ai-cuddle-en', 'ai-cc-en', 'ckq-en', 'call-resume', 'call-no-hangup', 'ml-write-en', 'ml-fish-week-en', 'ml-punct-en', 'diary-ta-write-en', 'diary-ta-punct-en', 'diary-ta-kaomoji-en', 'diary-ta-emoji-en', 'fd-post-en', 'fd-punct-en', 'fd-kaomoji-en', 'fd-emoji-en', 'fd-sticker-en', 'fd-image-en', 'qs-en', 'qs-cc', 'qs-one', 'qs-multi', 'qs-noLimit', 'mjf-en', 'mjf-src-cc', 'mjf-src-def', 'mjf-src-dict', 'mjf-mix', 'mjf-punct', 'rc-en', 'rl-en', 'fish-en', 'work-en', 'fish-grab-en', 'rp-thx-en', 'turn-en', 'gc-turn-en'].forEach(k => {
 const el = document.getElementById(k);
 if (el) el.checked = cfg[k] === 1;
 });
 try { if (window.rpThxModeSync) window.rpThxModeSync(); } catch (e) {}
 syncSpellPairReadout();
 }
+window.syncReplySettingsUI = function () { syncUI(); };
 let callIncomingToastTimer = null;
 function toastCallIncoming(v) {
 clearTimeout(callIncomingToastTimer);
@@ -397,6 +411,8 @@ const TOGGLE_NAMES = {
 'ai-cc-en': 'TA分享字卡', 'ckq-en': 'TA主动查岗', 'call-resume': '刷新恢复通话', 'call-no-hangup': '禁止联系人挂断',
 'ml-write-en': '联系人主动写信', 'fd-post-en': '联系人主动发朋友圈',
 'ml-punct-en': '信件拼接随机标点', 'fd-punct-en': '朋友圈拼接随机标点',
+'diary-ta-write-en': '梦角主动写日记', 'diary-ta-punct-en': '日记拼接随机标点',
+'diary-ta-kaomoji-en': '日记颜文字', 'diary-ta-emoji-en': '日记emoji',
 'ml-fish-week-en': '摸鱼小结寄信',
 'fd-kaomoji-en': '朋友圈颜文字', 'fd-emoji-en': '朋友圈emoji', 'fd-sticker-en': '朋友圈表情包', 'fd-image-en': '朋友圈图片',
 'qs-en': '词典拼字', 'qs-cc': '混用自定义字卡', 'qs-one': '单气泡拼字', 'qs-multi': '多回复逐卡连发',
@@ -428,7 +444,7 @@ d.className = 'cc-toast'; void d.offsetWidth; d.className = 'cc-toast show';
 clearTimeout(d._timer); d._timer = setTimeout(() => { d.className = 'cc-toast'; }, 1800);
 } catch (e) {}
 }
-['py-en', 'py-punct-en', 'as-en', 'dnd-en', 'as-badge', 'ml-kaomoji-en', 'ml-emoji-en', 'ml-sticker-en', 'cs-normal', 'cs-trigger-name', 'cs-trigger-bar', 'gc-cs-normal', 'gc-cs-trigger-name', 'gc-cs-trigger-bar', 'gc-py-en', 'ai-rps-en', 'ai-game-en', 'ai-cuddle-en', 'ai-cc-en', 'ckq-en', 'call-resume', 'call-no-hangup', 'ml-write-en', 'ml-fish-week-en', 'ml-punct-en', 'fd-post-en', 'fd-punct-en', 'fd-kaomoji-en', 'fd-emoji-en', 'fd-sticker-en', 'fd-image-en', 'qs-en', 'qs-cc', 'qs-one', 'qs-multi', 'qs-noLimit', 'mjf-en', 'mjf-src-cc', 'mjf-src-def', 'mjf-src-dict', 'mjf-mix', 'mjf-punct', 'rc-en', 'rl-en', 'fish-en', 'work-en', 'fish-grab-en', 'rp-thx-en', 'turn-en', 'gc-turn-en'].forEach(k => {
+['py-en', 'py-punct-en', 'as-en', 'dnd-en', 'as-badge', 'ml-kaomoji-en', 'ml-emoji-en', 'ml-sticker-en', 'cs-normal', 'cs-trigger-name', 'cs-trigger-bar', 'gc-cs-normal', 'gc-cs-trigger-name', 'gc-cs-trigger-bar', 'gc-py-en', 'ai-rps-en', 'ai-game-en', 'ai-cuddle-en', 'ai-cc-en', 'ckq-en', 'call-resume', 'call-no-hangup', 'ml-write-en', 'ml-fish-week-en', 'ml-punct-en', 'diary-ta-write-en', 'diary-ta-punct-en', 'diary-ta-kaomoji-en', 'diary-ta-emoji-en', 'fd-post-en', 'fd-punct-en', 'fd-kaomoji-en', 'fd-emoji-en', 'fd-sticker-en', 'fd-image-en', 'qs-en', 'qs-cc', 'qs-one', 'qs-multi', 'qs-noLimit', 'mjf-en', 'mjf-src-cc', 'mjf-src-def', 'mjf-src-dict', 'mjf-mix', 'mjf-punct', 'rc-en', 'rl-en', 'fish-en', 'work-en', 'fish-grab-en', 'rp-thx-en', 'turn-en', 'gc-turn-en'].forEach(k => {
 const el = document.getElementById(k);
 if (el) {
 el.addEventListener('change', () => {
@@ -1263,7 +1279,7 @@ v = Math.min(max, Math.max(min, v));
 window.saveReplyCfg(k, v);
 }
 });
-['py-en', 'py-punct-en', 'as-en', 'dnd-en', 'as-badge', 'as-badge-heart', 'as-badge-star', 'as-badge-moon', 'as-badge-spark', 'as-badge-paw', 'as-badge-rand', 'ml-kaomoji-en', 'ml-emoji-en', 'ml-sticker-en', 'cs-normal', 'cs-trigger-name', 'cs-trigger-bar', 'gc-cs-normal', 'gc-cs-trigger-name', 'gc-cs-trigger-bar', 'gc-py-en', 'ai-rps-en', 'ai-game-en', 'ai-cuddle-en', 'ai-cc-en', 'ckq-en', 'call-resume', 'call-no-hangup', 'ml-write-en', 'ml-fish-week-en', 'ml-punct-en', 'fd-post-en', 'fd-punct-en', 'fd-kaomoji-en', 'fd-emoji-en', 'fd-sticker-en', 'fd-image-en', 'qs-en', 'qs-cc', 'qs-one', 'qs-multi', 'qs-noLimit', 'mjf-en', 'mjf-src-cc', 'mjf-src-def', 'mjf-src-dict', 'mjf-mix', 'mjf-punct', 'rc-en', 'rl-en', 'fish-en', 'work-en', 'fish-grab-en', 'rp-thx-en', 'turn-en', 'gc-turn-en'].forEach(k => {
+['py-en', 'py-punct-en', 'as-en', 'dnd-en', 'as-badge', 'as-badge-heart', 'as-badge-star', 'as-badge-moon', 'as-badge-spark', 'as-badge-paw', 'as-badge-rand', 'ml-kaomoji-en', 'ml-emoji-en', 'ml-sticker-en', 'cs-normal', 'cs-trigger-name', 'cs-trigger-bar', 'gc-cs-normal', 'gc-cs-trigger-name', 'gc-cs-trigger-bar', 'gc-py-en', 'ai-rps-en', 'ai-game-en', 'ai-cuddle-en', 'ai-cc-en', 'ckq-en', 'call-resume', 'call-no-hangup', 'ml-write-en', 'ml-fish-week-en', 'ml-punct-en', 'diary-ta-write-en', 'diary-ta-punct-en', 'diary-ta-kaomoji-en', 'diary-ta-emoji-en', 'fd-post-en', 'fd-punct-en', 'fd-kaomoji-en', 'fd-emoji-en', 'fd-sticker-en', 'fd-image-en', 'qs-en', 'qs-cc', 'qs-one', 'qs-multi', 'qs-noLimit', 'mjf-en', 'mjf-src-cc', 'mjf-src-def', 'mjf-src-dict', 'mjf-mix', 'mjf-punct', 'rc-en', 'rl-en', 'fish-en', 'work-en', 'fish-grab-en', 'rp-thx-en', 'turn-en', 'gc-turn-en'].forEach(k => {
 const el = document.getElementById(k);
 if (el) {
 if (replyKeyUnvouched(k)) { if (skipped.indexOf(k) < 0) skipped.push(k); return; } // #1511：同上，读数未确认不落笔

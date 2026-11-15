@@ -326,8 +326,7 @@ pages.scrollLeft = idx * pageStep();
 sync();
 }
 };
-refreshCache();
-sync();
+deskRebuild();
 window.deskGo = go;
 window.deskIdx = function () { return idx; };
 window.__deskSlideDiag = function () {

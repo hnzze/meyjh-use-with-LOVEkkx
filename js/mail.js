@@ -820,7 +820,7 @@ return fixed || m;
 function mailPlainDesc(s) {
 return mailCleanDisplay(String(s == null ? '' : s)).replace(MAIL_DESC_SLICE_RE, '[图片]');
 }
-function mailCardPool(cid) {
+function mailCardPool(cid, cfgOverride) {
 const custom = cid ? (window.getCustomCardsFor ? window.getCustomCardsFor(cid) : []) : ((window.getCustomCards && window.getCustomCards()) || []);
 const pokeSet = (function () {
 const pk = cid ? (window.getPokeCardsFor ? window.getPokeCardsFor(cid) : []) : ((window.getPokeCards && window.getPokeCards()) || []);
@@ -868,7 +868,7 @@ text.push(s);
 pushDefault();
 const sticker = cid ? (window.getMediaCardsFor ? window.getMediaCardsFor(cid, 'sticker') : []) : ((window.getMediaCards && window.getMediaCards('sticker')) || []);
 const image = cid ? (window.getMediaCardsFor ? window.getMediaCardsFor(cid, 'image') : []) : ((window.getMediaCards && window.getMediaCards('image')) || []);
-const tcfg = mailCfgFor(cid);
+const tcfg = cfgOverride || mailCfgFor(cid);
 if (!tcfg.kaomojiEn) { kaomoji.length = 0; defKaomoji.length = 0; }
 if (!tcfg.emojiEn) { emoji.length = 0; defEmoji.length = 0; }
 if (!tcfg.stickerEn) { sticker.length = 0; image.length = 0; }
@@ -883,7 +883,7 @@ sticker: sticker,
 image: image
 };
 }
-function pickDefaultMailCard(pool, cid) {
+function pickDefaultMailCard(pool, cid, cfgOverride) {
 try {
 const st = (cid && window.storeFor) ? window.storeFor(cid) : null;
 const a = (window.defaultCardApiFor && st) ? window.defaultCardApiFor(st) : null;
@@ -894,7 +894,7 @@ if (Math.random() * 100 >= overall) return '';
 const keys = ['main', 'kaomoji', 'emoji'];
 const pools = { main: pool.defText, kaomoji: pool.defKaomoji, emoji: pool.defEmoji };
 const catOn = a ? a.cat : (window.defaultCardCat || (() => true));
-const mcfg = mailCfgFor(cid);
+const mcfg = cfgOverride || mailCfgFor(cid);
 const weights = keys.map(k => {
 if (k === 'kaomoji' && !mcfg.kaomojiEn) return 0;
 if (k === 'emoji' && !mcfg.emojiEn) return 0;
@@ -924,23 +924,27 @@ stickerN: (p.sticker || []).length, imageN: (p.image || []).length
 };
 } catch (e) { return null; }
 };
-function taLetterContent(cfg, cid) {
-const pool = mailCardPool(cid);
+function taLetterContent(cfg, cid, options) {
+const opts = options || {};
+const pool = mailCardPool(cid, cfg);
 const hasCustom = pool.text.some(s => typeof s === 'string' && /[A-Za-z0-9\u4e00-\u9fff\u3041-\u3096\u30a1-\u30fa]/.test(s));
-const words = hasCustom ? pool.text : (pool.defText.length ? pool.defText : TA_LETTERS);
+const customWords = Array.isArray(opts.words) && opts.words.length ? opts.words : null;
+const words = customWords || (hasCustom ? pool.text : (pool.defText.length ? pool.defText : TA_LETTERS));
 const maxN = Math.max(1, words.length);
-const wantMin = Math.min(Math.max(1, cfg.minCards || 1), maxN);
-const wantMax = Math.min(Math.max(wantMin, cfg.maxCards || wantMin), maxN);
+const rawMin = Math.max(1, Number(cfg.minCards) || 1);
+const rawMax = Math.max(rawMin, Number(cfg.maxCards) || rawMin);
+const wantMin = opts.clampToPool === false ? rawMin : Math.min(rawMin, maxN);
+const wantMax = opts.clampToPool === false ? rawMax : Math.min(Math.max(wantMin, rawMax), maxN);
 const n = wantMin + Math.floor(Math.random() * (wantMax - wantMin + 1));
 const parts = [];
 for (let i = 0; i < n; i++) {
-if (hasCustom) {
-const d = pickDefaultMailCard(pool, cid);
+if (hasCustom && !customWords) {
+const d = pickDefaultMailCard(pool, cid, cfg);
 if (d) { parts.push(d); continue; }
 }
 parts.push(words[Math.floor(Math.random() * words.length)]);
 }
-try {
+if (!opts.skipDict) try {
 if (window.dictUse && window.dictUse('mail') && window.dictQuoteOne
 && Math.random() * 100 < (window.dictOverall ? window.dictOverall('mail') : 30)) {
 const dq = window.dictQuoteOne();
@@ -948,19 +952,21 @@ if (dq) parts.push(dq);
 }
 } catch (eDQ) {}
 const rcf = window.replyCfgFor ? window.replyCfgFor(cid) : null;
-let t = (window.pyJoinCards && rcf) ? window.pyJoinCards(parts, rcf, rcf['ml-punct-en'] === 1) : parts.join(' ');
+const punctEn = opts.punctEn === undefined ? (rcf && rcf['ml-punct-en'] === 1) : !!opts.punctEn;
+let t = (window.pyJoinCards && rcf) ? window.pyJoinCards(parts, rcf, punctEn) : parts.join(' ');
 const kp = pool.kaomoji.length ? pool.kaomoji : pool.defKaomoji;
 const ep = pool.emoji.length ? pool.emoji : pool.defEmoji;
 if (cfg.kaomojiEn && kp.length && Math.random() * 100 < 30) t += ' ' + kp[Math.floor(Math.random() * kp.length)];
 if (cfg.emojiEn && ep.length && Math.random() * 100 < 15) t += ' ' + ep[Math.floor(Math.random() * ep.length)];
 const st = pool.sticker.concat(pool.image).filter(s => typeof s === 'string' && s.indexOf('http') !== 0 && mailIsImgRef(s));
-if (cfg.stickerEn && st.length && Math.random() * 100 < 20) {
+if (!opts.textOnly && cfg.stickerEn && st.length && Math.random() * 100 < 20) {
 const orig = st[Math.floor(Math.random() * st.length)];
 const small = (window._shrunkStickerCache && window._shrunkStickerCache[orig]) || orig;
 t += ' ' + small;
 }
-return mailCanonPayload(t);
+return opts.raw ? t : mailCanonPayload(t);
 }
+window.mailTaLetterContent = taLetterContent;
 function letterLast(cid) { const v = parseInt(csFor(cid).get('mail-letter-last'), 10); return isNaN(v) ? 0 : v; }
 function letterNext(cid) { const v = parseFloat(csFor(cid).get('mail-letter-next')); return isNaN(v) ? 0 : v; }
 function letterDayKey() {

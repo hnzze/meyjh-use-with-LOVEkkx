@@ -845,11 +845,23 @@ if (n >= 1024) return Math.round(n / 1024) + ' KB';
 return Math.round(n) + ' B';
 }
 function exportCoverage() {
+const diaryByKey = {};
+const diaryLine = (arr, k) => {
+let mine = 0, ta = 0;
+(Array.isArray(arr) ? arr : []).forEach(x => { if (x && x.author === 'ta') ta++; else mine++; });
+if (k) diaryByKey[k] = { mine: mine, ta: ta };
+let M = 0, T = 0;
+Object.keys(diaryByKey).forEach(kk => { M += diaryByKey[kk].mine; T += diaryByKey[kk].ta; });
+const total = M + T;
+if (!total) return null;
+return total + ' 篇（我的' + M + '篇，梦角' + T + '篇）';
+};
 const RULES = [
 [/:chat-msgs$/, '聊天记录', arr => arr.length + ' 条'],
 [/:group-chat-msgs$|:gc-msgs-/, '群聊记录', arr => arr.length + ' 条'],
 [/mail-letters/, '信箱', arr => arr.length + ' 封'],
 [/feed-posts/, '朋友圈', arr => arr.length + ' 条'],
+[/^xy-home-v2:(?:[^:]+:)?diary-entries$/, '日记', diaryLine, true],
 [/cc-groups/, '字卡库', obj => Object.keys(obj).length + ' 组'],
 [/quote-cards/, '自定义字卡', arr => arr.length + ' 张'],
 [/fav-msgs/, '收藏', arr => arr.length + ' 条'],
@@ -877,7 +889,8 @@ see(k, v) {
 if (v === null || v === undefined) return;
 const bigStr = typeof v === 'string' && v.length > BIG_STR;
 for (let i = 0; i < RULES.length; i++) {
-if (desc[i] !== null && from[i] !== k) continue;
+const many = RULES[i][3] === true; // 跨桌面聚合计数的功能（如日记）不锁首个键
+if (!many && desc[i] !== null && from[i] !== k) continue;
 if (!RULES[i][0].test(k)) continue;
 if (bigStr) { desc[i] = RULES[i][2] ? '✓有（数据较大）' : '✓有'; from[i] = k; continue; }
 const parsed = unwrap(v);
@@ -885,7 +898,7 @@ if (parsed === null || parsed === undefined || parsed === '') { desc[i] = null; 
 try {
 const parse = RULES[i][2];
 desc[i] = (parse && (Array.isArray(parsed) || typeof parsed === 'object'))
-? parse(parsed) : '✓有';
+? parse(parsed, k) : '✓有';
 from[i] = k;
 } catch (e) { desc[i] = '✓有'; from[i] = k; }
 }
@@ -1183,7 +1196,9 @@ let retainUnknownKey = ''; // #1359c：有键问不出＝未知 → 这一发中
 const idbRestored = new Promise((resolve) => {
 if (!data.idb || typeof data.idb !== 'object') { resolve(true); return; }
 const idbKeys = Object.keys(data.idb).filter(k => k.indexOf('xy-home-v2:') === 0 && k !== SNAPSHOT_KEY);
-if (!idbKeys.length) { resolve(true); return; }
+const canReplaceEmpty = !!(window.idbReplaceAll && window.idbListKeys && window.idbGetMany);
+// 即使备份没有大键，也要清掉 IDB 中待恢复小键的旧镜像，避免刷新后回放到 localStorage。
+if (!idbKeys.length && !canReplaceEmpty) { resolve(true); return; }
 if (window.idbReplaceAll) {
 impShow('正在导入…', '正在原子写入大文件（字卡/聊天/音乐等）…', 8);
 const pairs = idbKeys.map(k => ({ k: k, v: data.idb[k] }));
@@ -1688,9 +1703,9 @@ doImport(f);
 pills: [{ label: '完整备份（全部数据）', value: 'full' },
 { label: '仅聊天记录（全部桌面联系人）', value: 'chat' },
 { label: '取消', value: 'cancel' }],
-staticText: '完整备份：按备份文件恢复全部数据（会覆盖本机现有数据，含设置 / 字卡 / 朋友圈 / 音乐等）。\n' +
+staticText: '完整备份：按备份文件恢复全部数据（会覆盖本机现有数据，含设置 / 字卡 / 朋友圈 / 音乐 / 日记等）。\n' +
 '仅聊天记录：只恢复备份里的聊天记录——全部桌面联系人（含默认桌面）与群聊，' +
-'消息里引用到的图片/语音一并恢复；设置、字卡、朋友圈、音乐一律不动。\n' +
+'消息里引用到的图片/语音一并恢复；设置、字卡、朋友圈、音乐、日记一律不动。\n' +
 '两种都能读「导出数据」产生的备份文件；仅聊天记录还会识别单桌导出的聊天文件。\n' +
 '选文件时若弹出来的是相册，请在选择器里切到「文件／存储空间」再选——备份是 .json 文件。'
 });
