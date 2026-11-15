@@ -109,8 +109,17 @@ try { if (window.idbSet) window.idbSet(G + ':' + KEY_DAILY, JSON.stringify(obj))
 } catch (e) {}
 }
 function loadNotify() {
-try { var n = JSON.parse(store.get(KEY_NOTIFY) || 'null'); if (n) return n; } catch (e) {}
-return { enabled: false, advanceDays: [3, 1, 0], hour: 9, careEnabled: true, fired: {} };
+var d = { enabled: false, advanceDays: [3, 1, 0], hour: 9, careEnabled: true, fired: {}, popEnabled: true, symptomEnabled: true, symptomHour: 21 };
+try {
+var n = JSON.parse(store.get(KEY_NOTIFY) || 'null');
+if (n && typeof n === 'object') {
+for (var k in d) { if (n[k] === undefined) n[k] = d[k]; }
+if (!n.fired || typeof n.fired !== 'object') n.fired = {};
+if (!Array.isArray(n.advanceDays) || !n.advanceDays.length) n.advanceDays = d.advanceDays.slice();
+return n;
+}
+} catch (e) {}
+return d;
 }
 function saveNotify(n) {
 try {
@@ -182,6 +191,12 @@ function parseDay(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +
 function diffDays(a, b) { return Math.round((parseDay(b) - parseDay(a)) / 864e5); }
 function addDays(s, n) { var d = parseDay(s); d.setDate(d.getDate() + n); return dayStr(d); }
 function todayStr() { return dayStr(new Date()); }
+function isValidDay(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s || '') && dayStr(parseDay(s)) === s; }
+function effectiveEnd(r, today) {
+if (r.end) return r.end;
+var t = today || todayStr();
+return r.start <= t ? t : addDays(r.start, cfg.periodLen - 1);
+}
 function newId() { return Date.now().toString(36) + '_' + Math.floor(Math.random() * 1e6).toString(36); }
 function median(arr) {
 if (!arr.length) return 0;
@@ -196,7 +211,8 @@ var last = out[out.length - 1];
 if (last) {
 var lastEnd = last.end || last.start;
 if (diffDays(lastEnd, r.start) <= 1) {
-if (r.end && (!last.end || r.end > last.end)) last.end = r.end;
+if (!r.end) last.end = null;
+else if (!last.end || r.end > last.end) last.end = r.end;
 return;
 }
 }
@@ -285,7 +301,7 @@ var today = todayStr();
 var cl = effCycleLen();
 var inPeriod = false, curRec = null;
 recs.forEach(function (r) {
-var end = r.end || addDays(r.start, cfg.periodLen - 1);
+var end = effectiveEnd(r, today);
 if (today >= r.start && today <= end) { inPeriod = true; curRec = r; }
 });
 var last = recs[recs.length - 1];
@@ -294,20 +310,22 @@ var nextStart = null;
 var ovulationDay = cl - luteal();
 if (baseStart) {
 if (inPeriod) nextStart = addDays(curRec.start, cl);
-else { var s = baseStart; while (s < today) s = addDays(s, cl); nextStart = s; }
+else nextStart = baseStart > today ? baseStart : addDays(baseStart, cl);
 }
 var stats = cycleStats();
 var sigmaTxt = (stats.n >= 3 && stats.std >= 0.5) ? '（±' + Math.round(stats.std) + ' 天）' : '';
 if (inPeriod) {
 var dayOfPeriod = diffDays(curRec.start, today) + 1;
-var end2 = curRec.end || addDays(curRec.start, cfg.periodLen - 1);
-var remain = diffDays(today, end2) + 1;
-return { phase: 'period', inPeriod: true, nextStart: nextStart, dayOfCycle: dayOfPeriod, ovulationDay: ovulationDay, cycleLen: cl, title: '经期第 ' + dayOfPeriod + ' 天', sub: '预计还剩 ' + Math.max(0, remain) + ' 天 · 注意保暖休息', sigma: sigmaTxt };
+var remain = curRec.end ? diffDays(today, curRec.end) + 1 : 0;
+return { phase: 'period', inPeriod: true, nextStart: nextStart, dayOfCycle: dayOfPeriod, ovulationDay: ovulationDay, cycleLen: cl, title: '经期第 ' + dayOfPeriod + ' 天', sub: curRec.end ? '预计还剩 ' + Math.max(0, remain) + ' 天 · 注意保暖休息' : '经期进行中 · 注意保暖休息', sigma: sigmaTxt };
 }
 if (!baseStart) return { phase: 'unknown', inPeriod: false, nextStart: null, dayOfCycle: 0, ovulationDay: ovulationDay, cycleLen: cl, title: '暂无记录', sub: '点下方按钮标记本次经期开始', sigma: '' };
 if (baseStart > today) return { phase: 'safe', inPeriod: false, nextStart: baseStart, dayOfCycle: 0, ovulationDay: ovulationDay, cycleLen: cl, title: '距下次经期约 ' + diffDays(today, baseStart) + ' 天' + sigmaTxt, sub: '已预记录未来经期开始', sigma: sigmaTxt };
 var dayOfCycle = diffDays(baseStart, today) + 1;
-if (dayOfCycle > cl + 1) return { phase: 'safe', delayed: true, inPeriod: false, nextStart: nextStart, dayOfCycle: dayOfCycle, ovulationDay: ovulationDay, cycleLen: cl, title: '经期已推迟 ' + (dayOfCycle - cl - 1) + ' 天', sub: '点下方按钮标记本次经期开始', sigma: sigmaTxt };
+if (dayOfCycle > cl + 1) {
+var delayDays = dayOfCycle - cl - 1;
+return { phase: 'safe', delayed: true, delayDays: delayDays, inPeriod: false, nextStart: nextStart, dayOfCycle: dayOfCycle, ovulationDay: ovulationDay, cycleLen: cl, title: '经期已推迟 ' + delayDays + ' 天', sub: '点下方按钮标记本次经期开始', sigma: sigmaTxt };
+}
 if (dayOfCycle >= ovulationDay - 5 && dayOfCycle <= ovulationDay + 1) {
 var toOv = ovulationDay - dayOfCycle;
 return { phase: 'fertile', inPeriod: false, nextStart: nextStart, dayOfCycle: dayOfCycle, ovulationDay: ovulationDay, cycleLen: cl, title: '排卵期 · 第 ' + dayOfCycle + ' 天', sub: toOv > 0 ? '距排卵约 ' + toOv + ' 天' : (toOv === 0 ? '今天约为排卵日' : '排卵约 ' + (-toOv) + ' 天前'), sigma: sigmaTxt };
@@ -317,21 +335,26 @@ return { phase: 'safe', inPeriod: false, nextStart: nextStart, dayOfCycle: dayOf
 }
 function dayPhase(ds) {
 recs = normalize(recs);
+var today = todayStr();
 for (var i = 0; i < recs.length; i++) {
 var r = recs[i];
-var end = r.end || addDays(r.start, cfg.periodLen - 1);
+var end = effectiveEnd(r, today);
 if (ds >= r.start && ds <= end) return 'period';
 }
 var last = recs[recs.length - 1];
 if (!last) return 'none';
-var today = todayStr();
 var cl = effCycleLen();
 var ovu = cl - luteal();
-var starts = [];
-var s = last.start, guard = 0;
+var ongoing = !last.end && last.start <= today;
+var dayOfCycle = last.start <= today ? diffDays(last.start, today) + 1 : 0;
+var delayed = !ongoing && dayOfCycle > cl + 1;
+var starts = [last.start];
+if (!delayed) {
+var s = addDays(last.start, cl), guard = 0;
 while (s <= addDays(today, cl * 3) && guard < 200) {
 starts.push(s);
 s = addDays(s, cl); guard++;
+}
 }
 for (var j = 1; j < starts.length; j++) {
 var pEnd = addDays(starts[j], cfg.periodLen - 1);
@@ -458,6 +481,7 @@ var daysToNext = st.nextStart ? diffDays(todayStr(), st.nextStart) : null;
 var progress = st.cycleLen && st.dayOfCycle ? Math.min(1, st.dayOfCycle / st.cycleLen) : 0;
 var bigNum, bigSub;
 if (st.inPeriod) { bigNum = st.dayOfCycle; bigSub = '经期第' + st.dayOfCycle + '天'; }
+else if (st.delayed) { bigNum = st.delayDays; bigSub = '天 · 已推迟'; }
 else if (daysToNext !== null && daysToNext >= 0) { bigNum = daysToNext === 0 ? '今日' : daysToNext; bigSub = daysToNext === 0 ? '预计开始' : '天后'; }
 else { bigNum = '—'; bigSub = ''; }
 var circ = 2 * Math.PI * 26;
@@ -503,7 +527,7 @@ ovuLine.className = 'period-ovu-line';
 if (bar && bar.parentNode) bar.parentNode.insertBefore(ovuLine, bar.nextSibling);
 }
 if (ovuLine) {
-if (st.inPeriod || !st.dayOfCycle || !st.ovulationDay) {
+if (st.inPeriod || st.delayed || !st.dayOfCycle || !st.ovulationDay) {
 ovuLine.hidden = true;
 } else {
 ovuLine.hidden = false;
@@ -606,13 +630,14 @@ recs = normalize(recs);
 if (!recs.length) { el.innerHTML = ((window.mochiDataPending && window.mochiDataPending()) ? window.mochiLoadingHtml('经期记录') : '<div class="period-empty">还没有记录，标记本次经期开始后会显示在这里</div>'); return; }
 var arr = recs.slice().reverse();
 var html = '';
+var today = todayStr();
 arr.forEach(function (r, i) {
-var end = r.end || addDays(r.start, cfg.periodLen - 1);
+var end = effectiveEnd(r, today);
 var len = diffDays(r.start, end) + 1;
 var next = arr[i - 1];
 var cycleTxt = next ? ' · 周期 ' + diffDays(r.start, next.start) + ' 天' : '';
-var endTxt = r.end ? r.end : '进行中';
-html += '<div class="period-hist-row"><span class="ph-date">' + r.start + ' ~ ' + endTxt + '</span><span class="ph-meta">持续 ' + len + ' 天' + cycleTxt + '</span><button class="ph-del" data-id="' + r.id + '" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a1 1 0 01-1 1H7a1 1 0 01-1-1L5 6"/></svg></button></div>';
+var endTxt = r.end ? r.end : (r.start <= today ? '进行中' : '未设定');
+html += '<div class="period-hist-row"><span class="ph-date">' + r.start + ' ~ ' + endTxt + '</span><span class="ph-meta">持续 ' + len + ' 天' + cycleTxt + '</span><button class="ph-del ph-edit" data-id="' + r.id + '" title="编辑"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button><button class="ph-del" data-id="' + r.id + '" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a1 1 0 01-1 1H7a1 1 0 01-1-1L5 6"/></svg></button></div>';
 });
 el.innerHTML = html;
 }
@@ -629,6 +654,22 @@ var MOODS = [
 { k: 1, label: '很差' }, { k: 2, label: '低落' }, { k: 3, label: '一般' }, { k: 4, label: '不错' }, { k: 5, label: '很好' }
 ];
 var SYM_MAP = {}; SYMPTOMS.forEach(function (s) { SYM_MAP[s.k] = s.label; });
+var MOOD_MAP = {}; MOODS.forEach(function (m) { MOOD_MAP[m.k] = m.label; });
+function currentDayRec(ds) {
+var today = todayStr();
+var list = normalize(recs);
+for (var i = 0; i < list.length; i++) {
+if (ds >= list[i].start && ds <= effectiveEnd(list[i], today)) return list[i];
+}
+return null;
+}
+function dayStageTxt(ds, r) {
+if (r) return '经期第 ' + (diffDays(r.start, ds) + 1) + ' 天';
+var ph = dayPhase(ds);
+if (ph === 'predict') return '预测经期';
+if (ph === 'fertile') return '排卵期';
+return '普通日';
+}
 function renderStats() {
 var scroll = document.querySelector('#page-period .period-scroll');
 if (!scroll) return;
@@ -817,13 +858,13 @@ for (var oi = 0; oi < olds.length; oi++) olds[oi].remove();
 var latest = daily[todayStr()];
 var ds = todayStr();
 if (!latest || !latest.symptoms || !latest.symptoms.length) {
-var keys = Object.keys(daily);
+var keys = Object.keys(daily).sort();
 for (var i = keys.length - 1; i >= 0; i--) {
 var info = daily[keys[i]];
 if (info && info.symptoms && info.symptoms.length) { ds = keys[i]; latest = info; break; }
 }
 }
-if (!latest) {
+if (!latest || !latest.symptoms || !latest.symptoms.length) {
 var card = document.createElement('div');
 card.className = 'period-card glass';
 card.id = 'period-remedy-card';
@@ -865,9 +906,10 @@ var mean = st.mean, med = st.median, n = st.diffs.length;
 var txt = '近 ' + n + ' 次周期平均 ' + (mean.toFixed(0)) + ' 天 · 中位 ' + med + ' 天';
 var lens = [];
 recs = normalize(recs);
+var today = todayStr();
 for (var i = 0; i < recs.length; i++) {
 var r = recs[i];
-lens.push(diffDays(r.start, r.end || addDays(r.start, cfg.periodLen - 1)) + 1);
+lens.push(diffDays(r.start, effectiveEnd(r, today)) + 1);
 }
 if (lens.length) txt += ' · 经期平均 ' + (lens.reduce(function (a, b) { return a + b; }, 0) / lens.length).toFixed(1) + ' 天';
 var ds = st.diffs;
@@ -889,7 +931,7 @@ recs = normalize(recs);
 var today = todayStr();
 for (var i = 0; i < recs.length; i++) {
 var r = recs[i];
-var end = r.end || addDays(r.start, cfg.periodLen - 1);
+var end = effectiveEnd(r, today);
 if (today >= r.start && today <= end) { toast('当前已在经期中'); return; }
 }
 recs.push({ id: newId(), start: today, end: null });
@@ -903,7 +945,10 @@ function markEnd() {
 recs = normalize(recs);
 var today = todayStr();
 var found = null;
-recs.forEach(function (r) { if (!r.end && r.start <= today) found = r; });
+recs.forEach(function (r) {
+var end = effectiveEnd(r, today);
+if (r.start <= today && today <= end) found = r;
+});
 if (!found) { toast('没有进行中的经期记录'); return; }
 found.end = today;
 recs = normalize(recs);
@@ -913,9 +958,10 @@ render();
 }
 function toggleDay(ds) {
 recs = normalize(recs);
+var today = todayStr();
 for (var i = 0; i < recs.length; i++) {
 var r = recs[i];
-var end = r.end || addDays(r.start, cfg.periodLen - 1);
+var end = effectiveEnd(r, today);
 if (ds >= r.start && ds <= end) {
 if (ds === r.start && ds === end) {
 recs = recs.filter(function (x) { return x !== r; });
@@ -945,15 +991,7 @@ recs = normalize(recs.concat([{ id: newId(), start: ds, end: addDays(ds, len - 1
 saveRecs(recs);
 render();
 }
-function unmarkDay(ds) {
-recs = normalize(recs);
-var hit = null;
-for (var i = 0; i < recs.length; i++) { if (recs[i].start === ds) { hit = recs[i]; break; } }
-if (!hit) { toggleDay(ds); return; }
-recs = recs.filter(function (x) { return x !== hit; });
-saveRecs(recs);
-render();
-}
+function unmarkDay(ds) { toggleDay(ds); }
 function delRec(id) {
 recs = recs.filter(function (r) { return String(r.id) !== String(id); });
 saveRecs(recs);
@@ -980,6 +1018,55 @@ var box = el.__ceBox || (el.parentNode && el.parentNode.querySelector('.ce-box[d
 if (box) return (box.innerText !== undefined ? box.innerText : box.textContent) || '';
 } catch (e) {}
 return v === undefined || v === null ? '' : String(v);
+}
+function openDayView(ds) {
+var existing = document.getElementById('period-day-view');
+if (existing) existing.remove();
+var info = daily[ds] || {};
+var hasInfo = Object.keys(info).length > 0;
+var rec = currentDayRec(ds);
+var pop = document.createElement('div');
+pop.id = 'period-day-view';
+pop.className = 'period-day-pop';
+var html = '<div class="dp-mask"></div><div class="dp-sheet">' +
+'<div class="dp-head"><span class="dp-date">' + ds + '</span><button class="dp-close" aria-label="关闭">×</button></div>';
+if (!hasInfo && !rec) {
+html += '<div class="dp-section"><div class="period-empty">暂无记录</div></div>' +
+'<div class="dp-actions"><button class="dv-add period-btn primary">添加记录</button></div>';
+} else {
+var startTxt = rec ? rec.start : '未标记为生理期';
+var endTxt = rec ? (rec.end || '进行中') : '—';
+var flowTxt = info.flow ? (FLOW_MAP[info.flow] || info.flow) : '未记录';
+var symTxt = (info.symptoms && info.symptoms.length) ? info.symptoms.map(function (k) { return SYM_MAP[k] || k; }).join('、') : '未记录';
+var tempTxt = info.temp ? info.temp + ' ℃' : '未记录';
+var moodTxt = info.mood ? (MOOD_MAP[info.mood] || ('情绪 ' + info.mood)) : '未记录';
+var noteTxt = info.note ? info.note : '未记录';
+html += '<div class="dp-section"><div class="dp-label">阶段</div><div class="dp-val">' + dayStageTxt(ds, rec) + '</div></div>' +
+'<div class="dp-section"><div class="dp-label">经期开始</div><div class="dp-val">' + startTxt + '</div></div>' +
+'<div class="dp-section"><div class="dp-label">经期结束</div><div class="dp-val">' + endTxt + '</div></div>' +
+'<div class="dp-section"><div class="dp-label">经量</div><div class="dp-val">' + flowTxt + '</div></div>' +
+'<div class="dp-section"><div class="dp-label">症状</div><div class="dp-val">' + symTxt + '</div></div>' +
+'<div class="dp-section"><div class="dp-label">基础体温</div><div class="dp-val">' + tempTxt + '</div></div>' +
+'<div class="dp-section"><div class="dp-label">情绪</div><div class="dp-val">' + moodTxt + '</div></div>' +
+'<div class="dp-section"><div class="dp-label">备注</div><div class="dp-val" style="white-space:pre-wrap">' + noteTxt + '</div></div>' +
+'<div class="dp-actions"><button class="dv-edit period-btn primary">编辑</button></div>';
+}
+html += '</div>';
+pop.innerHTML = html;
+appendPop(pop);
+document.body.classList.add('scroll-lock');
+pop.querySelector('.dp-mask').addEventListener('click', closeDayView);
+pop.querySelector('.dp-close').addEventListener('click', closeDayView);
+function toForm() { closeDayView(); openDayPop(ds); }
+var addBtn = pop.querySelector('.dv-add');
+var editBtn = pop.querySelector('.dv-edit');
+if (addBtn) addBtn.addEventListener('click', toForm);
+if (editBtn) editBtn.addEventListener('click', toForm);
+}
+function closeDayView() {
+var pop = document.getElementById('period-day-view');
+if (pop) pop.remove();
+document.body.classList.remove('scroll-lock');
 }
 function openDayPop(ds) {
 var existing = document.getElementById('period-day-pop');
@@ -1047,7 +1134,7 @@ var obj = {};
 if (flowBtn) obj.flow = flowBtn.getAttribute('data-flow');
 if (syms.length) obj.symptoms = syms;
 if (!isNaN(temp) && temp >= 35 && temp <= 38) obj.temp = temp;
-if (mood && mood !== 3) obj.mood = mood;
+if (mood) obj.mood = mood;
 if (note) obj.note = note;
 if (Object.keys(obj).length) daily[ds] = obj; else delete daily[ds];
 saveDaily(daily);
@@ -1059,6 +1146,7 @@ else if (!wantPeriod && dayPhase(ds) === 'period') unmarkDay(ds);
 }
 closeDayPop();
 render();
+openDayView(ds);
 toast('已保存');
 });
 pop.querySelector('.dp-del').addEventListener('click', function () {
@@ -1066,7 +1154,8 @@ delete daily[ds];
 saveDaily(daily);
 closeDayPop();
 render();
-toast('已删除');
+openDayView(ds);
+toast('已删除当天记录');
 });
 }
 function closeDayPop() {
@@ -1135,6 +1224,77 @@ fired = true;
 var cut = addDays(today, -30);
 Object.keys(notifyCfg.fired).forEach(function (k) { if (k < cut) delete notifyCfg.fired[k]; });
 if (fired) saveNotify(notifyCfg);
+}
+function popRemindSeen(k) { return !!notifyCfg.fired[k]; }
+function popRemindMark(k) { notifyCfg.fired[k] = 1; saveNotify(notifyCfg); }
+function popRemindHostReady() {
+var host = document.querySelector('.phone');
+if (!host) return false;
+try {
+var cs = getComputedStyle(host);
+if (cs && (cs.display === 'none' || cs.visibility === 'hidden')) return false;
+} catch (e) {}
+return true;
+}
+function maybePopRemind() {
+try {
+notifyCfg = loadNotify();
+if (!notifyCfg.popEnabled) return;
+if (document.getElementById('period-remind-pop')) return;
+if (!popRemindHostReady()) return;
+var today = todayStr();
+var st = status();
+var msgs = [], kinds = [];
+var advs = (notifyCfg.advanceDays || []).filter(function (x) { return x >= 0; });
+var maxAdv = advs.length ? Math.max.apply(null, advs) : 3;
+if (!st.inPeriod && !st.delayed && st.nextStart) {
+var d = diffDays(today, st.nextStart);
+if (d >= 0 && d <= maxAdv && !popRemindSeen(today + '_pop_adv')) {
+msgs.push(d === 0 ? '今天预计是经期开始日，记得留意身体，别受凉。' : '还有 ' + d + ' 天可能就到经期了，这两天别贪凉，早点休息。');
+kinds.push('adv');
+}
+}
+if (notifyCfg.symptomEnabled) {
+var nowH = new Date().getHours();
+var hour = typeof notifyCfg.symptomHour === 'number' ? notifyCfg.symptomHour : 21;
+var info = daily[today];
+var hasSym = info && info.symptoms && info.symptoms.length;
+if (nowH >= hour && !hasSym && !popRemindSeen(today + '_pop_sym')) {
+msgs.push('今天还没记症状，花一分钟记一下，我好知道你今天怎么样。');
+kinds.push('sym');
+}
+}
+if (!msgs.length) return;
+var pop = document.createElement('div');
+pop.id = 'period-remind-pop';
+pop.className = 'period-day-pop';
+pop.innerHTML =
+'<div class="dp-mask"></div>' +
+'<div class="dp-sheet">' +
+'<div class="dp-head"><span class="dp-date">梦角的提醒</span><button class="dp-close" aria-label="关闭">×</button></div>' +
+msgs.map(function (m) { return '<div class="dp-section"><div class="dp-val" style="line-height:1.8">' + m + '</div></div>'; }).join('') +
+'<div class="dp-actions"><button class="prm-later period-btn">晚点再说</button><button class="prm-go period-btn primary">去记录</button></div>' +
+'</div>';
+appendPop(pop);
+document.body.classList.add('scroll-lock');
+function closePop() { pop.remove(); document.body.classList.remove('scroll-lock'); }
+function dismissPop() {
+kinds.forEach(function (k) { popRemindMark(today + '_pop_' + k); });
+closePop();
+}
+pop.querySelector('.dp-mask').addEventListener('click', dismissPop);
+pop.querySelector('.dp-close').addEventListener('click', dismissPop);
+pop.querySelector('.prm-later').addEventListener('click', dismissPop);
+pop.querySelector('.prm-go').addEventListener('click', function () {
+dismissPop();
+var appEl = document.querySelector('.app[data-app="period"]');
+if (appEl) appEl.click();
+setTimeout(function () {
+if (kinds.indexOf('sym') >= 0) openDayPop(todayStr());
+else openDayView(todayStr());
+}, 120);
+});
+} catch (e) {}
 }
 function pickWarnLine(ctx, tier) {
 var name, fb;
@@ -1298,20 +1458,21 @@ function openReportPop() {
 var existing = document.getElementById('period-report-pop');
 if (existing) existing.remove();
 var now = new Date();
+var today = todayStr();
 var y = now.getFullYear(), m = now.getMonth();
 var monthStr = y + '年' + (m + 1) + '月';
 var mStart = y + '-' + pad2(m + 1) + '-01';
 var mEnd = y + '-' + pad2(m + 1) + '-' + pad2(new Date(y, m + 1, 0).getDate());
 recs = normalize(recs);
 var monthRecs = recs.filter(function (r) {
-var end = r.end || addDays(r.start, cfg.periodLen - 1);
+var end = effectiveEnd(r, today);
 return r.start <= mEnd && end >= mStart;
 });
 var monthDaily = {};
 for (var ds in daily) { if (ds >= mStart && ds <= mEnd) monthDaily[ds] = daily[ds]; }
 var periodDays = 0;
 monthRecs.forEach(function (r) {
-var end = r.end || addDays(r.start, cfg.periodLen - 1);
+var end = effectiveEnd(r, today);
 var s = r.start < mStart ? mStart : r.start;
 var e = end > mEnd ? mEnd : end;
 periodDays += diffDays(s, e) + 1;
@@ -1414,16 +1575,22 @@ if (work[key] < max) { work[key]++; valEl.textContent = work[key]; ovuPreview.te
 });
 });
 pop.querySelector('.dp-save').addEventListener('click', function () {
+var dateVal = readInpVal(pop.querySelector('.dp-date-input')).trim();
+if (dateVal && !isValidDay(dateVal)) { toast('请输入有效的上次经期开始日'); return; }
 saveCfg(work); cfg = work;
-var dateVal = pop.querySelector('.dp-date-input').value;
 if (dateVal) {
 var norm2 = normalize(recs);
-var exists = norm2.some(function (r) { return r.start === dateVal; });
-if (!exists) {
+if (norm2.length) {
+var lastRec = norm2[norm2.length - 1];
+if (lastRec.start !== dateVal) {
+lastRec.start = dateVal;
+if (lastRec.end && lastRec.end < dateVal) lastRec.end = addDays(dateVal, cfg.periodLen - 1);
+}
+} else {
 norm2.push({ id: newId(), start: dateVal, end: addDays(dateVal, cfg.periodLen - 1) });
+}
 norm2 = normalize(norm2);
 saveRecs(norm2); recs = norm2;
-}
 }
 closeSettingsPop();
 render();
@@ -1436,59 +1603,73 @@ var pop = document.getElementById('period-settings-pop');
 if (pop) pop.remove();
 document.body.classList.remove('scroll-lock');
 }
-function openRecordPop() {
+function openRecordPop(editId) {
 var existing = document.getElementById('period-record-pop');
 if (existing) existing.remove();
-var work = { days: cfg.periodLen };
+var editing = editId !== undefined && editId !== null;
+var source = null;
+if (editing) {
+recs = normalize(recs);
+for (var i = 0; i < recs.length; i++) {
+if (String(recs[i].id) === String(editId)) { source = recs[i]; break; }
+}
+if (!source) { toast('记录不存在，请刷新后重试'); return; }
+}
+var start = source ? source.start : todayStr();
+var end = source ? (source.end || '') : addDays(start, cfg.periodLen - 1);
 var pop = document.createElement('div');
 pop.id = 'period-record-pop';
 pop.className = 'period-day-pop';
 pop.innerHTML =
 '<div class="dp-mask"></div>' +
 '<div class="dp-sheet">' +
-'<div class="dp-head"><span class="dp-date">记一次经期</span><button class="dp-close">×</button></div>' +
-'<div class="dp-section"><div class="dp-label">开始日</div><input class="dp-date-input" type="date" value="' + todayStr() + '"/></div>' +
-'<div class="dp-section"><div class="dp-label">持续天数</div>' +
-'<div class="dp-stepper" data-key="days" data-min="1" data-max="14">' +
-'<button class="st-btn st-minus">−</button><span class="st-val">' + work.days + '</span>' +
-'<button class="st-btn st-plus">+</button><span class="st-unit">天</span>' +
-'</div></div>' +
-'<div class="dp-section"><div class="dp-label">这一周期</div><div class="dp-ovu-preview period-rec-span"></div></div>' +
-'<div class="dp-tip">默认天数取自周期设置里的「经期天数」，按自己这次的情况改。补记过去的日期不用一天一天点。</div>' +
+'<div class="dp-head"><span class="dp-date">' + (editing ? '编辑经期' : '记一次经期') + '</span><button class="dp-close">×</button></div>' +
+'<div class="dp-section"><div class="dp-label">开始日</div><input class="dp-date-input dp-start-input" type="date" value="' + start + '"/></div>' +
+'<div class="dp-section"><div class="dp-label">结束日（留空表示进行中）</div><input class="dp-date-input dp-end-input" type="date" value="' + end + '"/></div>' +
+'<div class="dp-section"><div class="dp-label">记录区间</div><div class="dp-ovu-preview period-rec-span"></div></div>' +
+'<div class="dp-tip">默认结束日按周期设置里的「经期天数」生成，可按这次实际情况修改；补记过去的日期不用一天一天点。</div>' +
 '<div class="dp-actions"><button class="dp-save period-btn primary">保存</button></div>' +
 '</div>';
 appendPop(pop);
 document.body.classList.add('scroll-lock');
 var spanEl = pop.querySelector('.period-rec-span');
+function inputVal(selector) { return readInpVal(pop.querySelector(selector)).trim(); }
 function showSpan() {
-var s = startVal();
-spanEl.textContent = s + ' ~ ' + addDays(s, work.days - 1) + '（' + work.days + ' 天）';
-}
-function startVal() {
-var v = pop.querySelector('input.dp-date-input').value;
-return /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : todayStr();
+var s = inputVal('.dp-start-input'), e = inputVal('.dp-end-input');
+if (!isValidDay(s)) { spanEl.textContent = '请选择有效开始日'; return; }
+if (e && !isValidDay(e)) { spanEl.textContent = '请选择有效结束日'; return; }
+if (e && e < s) { spanEl.textContent = '结束日不能早于开始日'; return; }
+spanEl.textContent = s + ' ~ ' + (e || '进行中') + (e ? '（' + (diffDays(s, e) + 1) + ' 天）' : '');
 }
 pop.querySelector('.dp-mask').addEventListener('click', closeRecordPop);
 pop.querySelector('.dp-close').addEventListener('click', closeRecordPop);
-var st = pop.querySelector('.dp-stepper');
-var min = parseInt(st.getAttribute('data-min'), 10);
-var max = parseInt(st.getAttribute('data-max'), 10);
-var valEl = st.querySelector('.st-val');
-st.querySelector('.st-minus').addEventListener('click', function () {
-if (work.days > min) { work.days--; valEl.textContent = work.days; showSpan(); }
+pop.querySelectorAll('input.dp-date-input').forEach(function (input) {
+input.addEventListener('input', showSpan);
+input.addEventListener('change', showSpan);
 });
-st.querySelector('.st-plus').addEventListener('click', function () {
-if (work.days < max) { work.days++; valEl.textContent = work.days; showSpan(); }
-});
-pop.querySelector('input.dp-date-input').addEventListener('change', showSpan);
 showSpan();
 pop.querySelector('.dp-save').addEventListener('click', function () {
-var s = startVal();
-recs = normalize(recs.concat([{ id: newId(), start: s, end: addDays(s, work.days - 1) }]));
+var s = inputVal('.dp-start-input'), e = inputVal('.dp-end-input');
+if (!isValidDay(s)) { toast('请选择有效开始日'); return; }
+if (e && !isValidDay(e)) { toast('请选择有效结束日'); return; }
+if (e && e < s) { toast('结束日不能早于开始日'); return; }
+recs = normalize(recs);
+if (editing) {
+var target = null;
+for (var i = 0; i < recs.length; i++) {
+if (String(recs[i].id) === String(editId)) { target = recs[i]; break; }
+}
+if (!target) { toast('记录不存在，请刷新后重试'); return; }
+target.start = s;
+target.end = e || null;
+} else {
+recs.push({ id: newId(), start: s, end: e || null });
+}
+recs = normalize(recs);
 saveRecs(recs);
 closeRecordPop();
 render();
-toast('已记录 ' + s + ' 起的 ' + work.days + ' 天');
+toast(editing ? '已更新经期记录' : '已记录 ' + s + ' 起' + (e ? ' 的 ' + (diffDays(s, e) + 1) + ' 天' : '，进行中'));
 checkNotify();
 });
 }
@@ -1541,6 +1722,18 @@ pop.innerHTML =
 '<div class="dp-actions"><button class="dp-save period-btn primary">保存</button></div>' +
 '</div>';
 appendPop(pop);
+var popExtra = document.createElement('div');
+popExtra.innerHTML = '<div class="dp-section"><div class="dp-label">站内温柔提示（打开网站时弹窗）</div><button class="dp-toggle pop-toggle"></button></div>' +
+'<div class="dp-section"><div class="dp-label">每日症状提醒</div><div class="dp-care-ctrl"><button class="dp-toggle sym-toggle"></button><input class="dp-hour dp-sym-hour" type="number" min="0" max="23"/></div></div>';
+var popSheet = pop.querySelector('.dp-sheet');
+var popActs = pop.querySelector('.dp-actions');
+if (popSheet && popActs) popSheet.insertBefore(popExtra, popActs);
+var popToggle = pop.querySelector('.pop-toggle');
+var symToggle = pop.querySelector('.sym-toggle');
+var symHourEl = pop.querySelector('.dp-sym-hour');
+if (popToggle) { popToggle.textContent = notifyCfg.popEnabled !== false ? '已开启' : '已关闭'; popToggle.classList.toggle('on', notifyCfg.popEnabled !== false); }
+if (symToggle) { symToggle.textContent = notifyCfg.symptomEnabled !== false ? '已开启' : '已关闭'; symToggle.classList.toggle('on', notifyCfg.symptomEnabled !== false); }
+if (symHourEl) symHourEl.value = typeof notifyCfg.symptomHour === 'number' ? notifyCfg.symptomHour : 21;
 var _tipEl = pop.querySelector('.dp-tip');
 var _tipDefault = _tipEl.textContent;
 function refreshPopTips() {
@@ -1571,6 +1764,16 @@ careBtn.textContent = notifyCfg.careEnabled ? '已开启' : '已关闭';
 careBtn.classList.toggle('on', notifyCfg.careEnabled);
 refreshPopTips();
 });
+if (popToggle) popToggle.addEventListener('click', function () {
+notifyCfg.popEnabled = notifyCfg.popEnabled === false;
+popToggle.textContent = notifyCfg.popEnabled ? '已开启' : '已关闭';
+popToggle.classList.toggle('on', notifyCfg.popEnabled);
+});
+if (symToggle) symToggle.addEventListener('click', function () {
+notifyCfg.symptomEnabled = notifyCfg.symptomEnabled === false;
+symToggle.textContent = notifyCfg.symptomEnabled ? '已开启' : '已关闭';
+symToggle.classList.toggle('on', notifyCfg.symptomEnabled);
+});
 var careMgr = pop.querySelector('.dp-care-mgr');
 if (careMgr) careMgr.addEventListener('click', openCarePop);
 pop.querySelectorAll('.adv').forEach(function (b) {
@@ -1581,8 +1784,10 @@ var advs = [];
 pop.querySelectorAll('.adv.on').forEach(function (b) { advs.push(parseInt(b.getAttribute('data-adv'), 10)); });
 if (!advs.length) advs = [3, 1, 0];
 var h = parseInt(readInpVal(pop.querySelector('input.dp-hour')), 10);
+var sh = parseInt(readInpVal(pop.querySelector('input.dp-sym-hour')), 10);
 notifyCfg.advanceDays = advs;
 notifyCfg.hour = isNaN(h) ? 9 : Math.min(23, Math.max(0, h));
+notifyCfg.symptomHour = isNaN(sh) ? 21 : Math.min(23, Math.max(0, sh));
 saveNotify(notifyCfg);
 closeNotifyPop();
 var _svh = periodPermHint();
@@ -1608,6 +1813,7 @@ viewM = -1;
 render();
 checkCare();
 checkNotify();
+maybePopRemind();
 });
 }
 var back = document.getElementById('period-back');
@@ -1633,7 +1839,7 @@ rsb.id = 'period-record-span';
 rsb.className = 'period-btn';
 rsb.textContent = '记一次经期';
 arow.appendChild(rsb);
-rsb.addEventListener('click', openRecordPop);
+rsb.addEventListener('click', function () { openRecordPop(); });
 }
 var grid = document.getElementById('period-grid');
 if (grid) {
@@ -1641,12 +1847,13 @@ grid.addEventListener('click', function (e) {
 var cell = e.target.closest('.pc-cell');
 if (!cell) return;
 var ds = cell.getAttribute('data-date');
-if (dayPhase(ds) !== 'period') markSpanStart(ds);
-openDayPop(ds);
+openDayView(ds);
 });
 }
 var hist = document.getElementById('period-history');
 if (hist) hist.addEventListener('click', function (e) {
+var edit = e.target.closest('.ph-edit');
+if (edit) { openRecordPop(edit.getAttribute('data-id')); return; }
 var del = e.target.closest('.ph-del');
 if (!del) return;
 delRec(del.getAttribute('data-id'));
@@ -1702,6 +1909,10 @@ if (st.inPeriod) {
 labelEl.textContent = '经期第 ' + st.dayOfCycle + ' 天';
 daysEl.textContent = st.dayOfCycle;
 subEl.textContent = '注意保暖休息';
+} else if (st.delayed) {
+labelEl.textContent = '经期已推迟';
+daysEl.textContent = st.delayDays + ' 天';
+subEl.textContent = '上次预计 ' + mdLabel(st.nextStart) + ' 开始';
 } else if (st.nextStart) {
 var d = diffDays(todayStr(), st.nextStart);
 labelEl.textContent = d === 0 ? '经期预计' : '距下次经期';
@@ -1712,7 +1923,7 @@ labelEl.textContent = '经期';
 daysEl.textContent = '—';
 subEl.textContent = '未记录';
 }
-if (barWrap && barFill && st.dayOfCycle && st.cycleLen) {
+if (barWrap && barFill && !st.delayed && st.dayOfCycle && st.cycleLen) {
 var cap = barWrap.querySelector('.dpd-bar-cap');
 if (cap) cap.textContent = '周期第 ' + st.dayOfCycle + '/' + st.cycleLen + ' 天';
 barWrap.hidden = false;
@@ -1732,12 +1943,14 @@ if (app) app.click();
 })();
 setTimeout(checkCare, 3000);
 setTimeout(checkNotify, 5000);
+setTimeout(maybePopRemind, 4000);
 window.periodNotifyCheckNow = checkNotify; // 手动/回归验证触发口（同 memoRemindTickNow 惯例）
+window.periodRemindNow = maybePopRemind; // 站内提醒回归验证触发口
 setInterval(function () { try { checkCare(); checkNotify(); } catch (e) {} }, 300000);
-document.addEventListener('mochi-fg-resume', function () { try { checkCare(); checkNotify(); } catch (e) {} });
+document.addEventListener('mochi-fg-resume', function () { try { checkCare(); checkNotify(); maybePopRemind(); } catch (e) {} });
 function reloadAfterRestore() {
 try { cfg = loadCfg(); recs = loadRecs(); daily = loadDaily(); notifyCfg = loadNotify(); } catch (e) {}
-try { checkCare(); checkNotify(); } catch (e) {}
+try { checkCare(); checkNotify(); maybePopRemind(); } catch (e) {}
 try { if (!page.hidden) render(); renderDeskWidget(); } catch (e) {}
 }
 document.addEventListener('mochi-restore-done', function () { setTimeout(reloadAfterRestore, 200); });
