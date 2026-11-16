@@ -4970,6 +4970,14 @@ padding:10px 14px 0;
 .diary-detail-body { flex:1; min-height:220px; font-size:14px; line-height:28px; color:var(--ink); white-space:pre-wrap; word-break:break-word; background:repeating-linear-gradient(transparent,transparent 27px,rgba(0,0,0,.06) 27px,rgba(0,0,0,.06) 28px); font-family:"Segoe Script","Comic Sans MS",cursive; }
 .diary-detail-mine { border-left:3px solid #6ba8e8; padding-left:12px; }
 .diary-detail-ta { border-left:3px solid #e88bb0; padding-left:12px; }
+.diary-ta-comment { margin:16px 0 4px 14px; padding:12px 14px; background:#fff5f8; border:1px solid rgba(232,139,176,.28); border-left:3px solid #e88bb0; border-radius:4px 14px 14px 14px; }
+.diary-ta-comment[hidden] { display:none; }
+.diary-ta-comment-tag { display:inline-block; margin-bottom:6px; padding:2px 8px; font-size:11px; font-weight:600; letter-spacing:.5px; color:#c2688c; background:rgba(232,139,176,.16); border-radius:999px; }
+.diary-ta-comment-text { font-size:13px; line-height:1.8; color:var(--ink); white-space:pre-wrap; word-break:break-word; font-family:"Segoe Script","Comic Sans MS",cursive; }
+@media (max-width:480px) {
+.diary-ta-comment { margin:14px 0 2px 8px; padding:10px 12px; border-radius:4px 12px 12px 12px; }
+.diary-ta-comment-text { font-size:13px; line-height:1.7; }
+}
 .diary-settings-body { display:flex; flex-direction:column; gap:24px; padding:10px 0; }
 .diary-setting-row { display:flex; flex-direction:column; gap:8px; }
 .diary-setting-label { display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:600; color:var(--ink); }
@@ -4990,6 +4998,8 @@ padding:10px 14px 0;
 [data-theme="dark"] .diary-item-ta { background:#3a2a35; border-color:var(--dark-border); }
 [data-theme="dark"] .diary-textarea { background:repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,.08) 27px,rgba(255,255,255,.08) 28px); color:var(--ink); }
 [data-theme="dark"] .diary-detail-body { background:repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,.08) 27px,rgba(255,255,255,.08) 28px); }
+[data-theme="dark"] .diary-ta-comment { background:#3a2a35; border-color:rgba(232,139,176,.3); border-left-color:#e88bb0; }
+[data-theme="dark"] .diary-ta-comment-tag { color:#e8aec5; background:rgba(232,139,176,.2); }
 [data-theme="dark"] .diary-edit-visible { background:rgba(255,255,255,.05); }
 [data-theme="dark"] .diary-month-header:hover { background:rgba(255,255,255,.06); }
 [data-theme="dark"] .diary-month-header:active { background:rgba(255,255,255,.1); }
@@ -13582,7 +13592,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
           <div class="set-group glass">
             <div class="gs-row"><span>梦角看我日记概率</span><div class="stepper" data-k="diary-ta-read-prob" data-min="0" data-max="100" data-step="5"><button class="stp-min">−</button><input class="stp-val" id="diary-ta-read-prob-val" readonly><button class="stp-max">+</button></div></div>
           </div>
-          <div class="gs-sub" style="padding:0 14px 14px">控制梦角能看到你日记的概率（仅对写日记时勾选「允许梦角查看」的日记生效）。设为 0 则梦角永远看不到你的日记。</div>
+          <div class="gs-sub" style="padding:0 14px 14px">控制梦角能看到你日记的概率（仅对写日记时勾选「允许梦角查看」的日记生效）。设为 0 则梦角永远看不到你的日记。梦角看过某篇日记后，会从字卡库抽一句话作为留言（每篇最多一条）。</div>
           <div class="gs-title">写日记内容</div>
           <div class="set-group glass">
             <div class="gs-row" style="flex-direction:column;align-items:stretch;gap:8px">
@@ -13613,7 +13623,7 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
               <div class="diary-type-chip" data-type="cute">撒娇</div>
             </div>
           </div>
-          <div class="gs-sub" style="padding:0 14px 14px">选择梦角写日记的内容类型。选择「随机」则从所有类型中随机抽取。</div>
+          <div class="gs-sub" style="padding:0 14px 14px">选择梦角写日记的内容类型：会优先从字卡库中抽取分组名包含该类型关键词的字卡（例如分组名含「风景」「天气」）；选「随机」则从字卡库全部文字卡中抽取。字卡库为空时使用内置文案。</div>
         </div>
         <!-- v3.6.x：保存设置按钮——点击把当前所有概率/开关写入本地并提示 -->
         <button class="ta-add-btn gs-save-btn" id="reply-save-btn" style="width:100%;margin:6px 0 10px">
@@ -16471,6 +16481,10 @@ font-size: 11.5px; color: var(--muted, #8a8a8a); cursor: pointer; touch-action: 
                 <span class="diary-page-date" id="diary-detail-date"></span>
               </div>
               <div class="diary-detail-body" id="diary-detail-body"></div>
+              <div class="diary-ta-comment" id="diary-ta-comment" hidden>
+                <span class="diary-ta-comment-tag">TA说</span>
+                <div class="diary-ta-comment-text" id="diary-ta-comment-text"></div>
+              </div>
               <div class="diary-edit-btns">
                 <button class="modal-btn cancel" id="diary-detail-del" style="color:#e05a5a">删除</button>
                 <button class="modal-btn cancel" id="diary-detail-back">返回列表</button>

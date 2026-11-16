@@ -331,6 +331,70 @@ cute: [
 '今天想抱抱你，因为想告诉你我有多爱你。'
 ]
 };
+const DIARY_TYPE_KEYWORDS = {
+scenery: ['风景', '天气', '天空', '自然'],
+movie: ['影视', '电影', '剧'],
+music: ['音乐', '歌'],
+mood: ['心事', '心情', '情绪'],
+fun: ['趣闻', '趣事', '搞笑'],
+work: ['学习', '工作'],
+star: ['追星', '偶像'],
+dream: ['梦境', '梦'],
+daily: ['小事', '日常'],
+recommend: ['推荐'],
+festival: ['节气', '节日'],
+birthday: ['生日', '纪念日'],
+thanks: ['感谢', '祝福'],
+sorry: ['道歉'],
+feeling: ['情感', '倾诉', '表白'],
+sick: ['生病', '关心'],
+cute: ['撒娇']
+};
+function diaryTextOk(card) {
+if (typeof card !== 'string') return false;
+const s = card.trim();
+if (!s) return false;
+if (window.ccTextCardOnly) { if (!window.ccTextCardOnly(s)) return false; }
+else if (s.indexOf('data:') === 0 || s.indexOf('@@m:') === 0 || s.indexOf('|||') >= 0 || /^https?:\/\//i.test(s)) return false;
+return (s.match(/[A-Za-z\u4e00-\u9fff\u3040-\u30ff]/g) || []).length >= 2;
+}
+function diaryTextPool(type) {
+const kw = DIARY_TYPE_KEYWORDS[type] || null;
+const typed = [], all = [];
+const add = (arr, card) => { if (!diaryTextOk(card)) return; if (arr.indexOf(card) < 0) arr.push(card); };
+['own', 'public'].forEach(scope => {
+let groups = [];
+try { groups = (window.getScopedGroups && window.getScopedGroups('text', scope)) || []; } catch (e) { groups = []; }
+groups.forEach(g => {
+if (!Array.isArray(g) || !Array.isArray(g[1])) return;
+const name = String(g[0] || '');
+const hit = !kw || kw.some(k => name.indexOf(k) >= 0);
+g[1].forEach(card => { add(all, card); if (hit) add(typed, card); });
+});
+});
+if (typed.length) return typed;
+if (all.length) return all;
+const def = [];
+try {
+const catOn = window.defaultCardCat ? window.defaultCardCat('main') : true;
+if (catOn) {
+((window.getDefaultCardGroups && window.getDefaultCardGroups('main')) || []).forEach(g => {
+((g && g[1]) || []).forEach(card => {
+if (window.isDefaultCardOff && window.isDefaultCardOff('main', card)) return;
+add(def, card);
+});
+});
+}
+} catch (e) {}
+return def;
+}
+function pickTaComment() {
+const pool = diaryTextPool('random');
+if (!pool.length) return '';
+const shortPool = pool.filter(x => x.length <= 40);
+const src = shortPool.length ? shortPool : pool;
+return src[Math.floor(Math.random() * src.length)];
+}
 function pad(n) { return (n < 10 ? '0' : '') + n; }
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function highlightText(text, keyword) {
@@ -501,6 +565,7 @@ const valid = list.every(x => x && typeof x === 'object' && !Array.isArray(x) &&
 typeof x.id === 'string' && typeof x.content === 'string' &&
 typeof x.ts === 'number' && isFinite(x.ts));
 if (!valid) { toast('导入失败，备份文件中的日记数据无效'); return; }
+list.forEach(x => { if (typeof x.taComment !== 'string' || !x.taComment.trim()) delete x.taComment; });
 const restore = () => {
 try {
 if (!saveEntries(list)) { toast('导入失败，请稍后重试'); return; }
@@ -691,6 +756,13 @@ if (body) {
 body.textContent = item.content || '';
 body.className = 'diary-detail-body diary-detail-' + (item.author === 'ta' ? 'ta' : 'mine');
 }
+const cmtWrap = document.getElementById('diary-ta-comment');
+const cmtText = document.getElementById('diary-ta-comment-text');
+if (cmtWrap && cmtText) {
+const cmt = typeof item.taComment === 'string' ? item.taComment.trim() : '';
+cmtText.textContent = cmt;
+cmtWrap.hidden = !cmt;
+}
 }
 function closeSettingsMenu() {
 const menu = document.getElementById('diary-settings-menu');
@@ -735,19 +807,29 @@ if (!content) { toast('写点内容再保存吧'); return; }
 const cb = document.getElementById('diary-visible-cb');
 const visible = cb ? cb.checked : true;
 const list = loadEntries();
-list.push({ id: genId(), content: content, ts: Date.now(), author: 'me', visibleToTa: visible });
+const entry = { id: genId(), content: content, ts: Date.now(), author: 'me', visibleToTa: visible };
+if (visible) {
+const s = loadSettings();
+if (s.taReadProb > 0 && Math.random() * 100 < s.taReadProb) {
+const cmt = pickTaComment();
+if (cmt) entry.taComment = cmt;
+}
+}
+list.push(entry);
 if (!saveEntries(list)) return;
-toast('日记保存成功');
+toast(entry.taComment ? '日记保存成功，梦角看过并留言了' : '日记保存成功');
 showList();
 }
 function taDiaryContent(s) {
-let pool = [];
+let pool = diaryTextPool(s.taContentType);
+if (!pool.length) {
 if (s.taContentType === 'random') {
 Object.keys(TA_TEMPLATES).forEach(k => {
 if (k !== 'random') pool = pool.concat(TA_TEMPLATES[k]);
 });
 } else if (TA_TEMPLATES[s.taContentType]) {
 pool = TA_TEMPLATES[s.taContentType];
+}
 }
 if (!pool.length) pool = TA_TEMPLATES.random;
 const cid = window.__activeCid || 'default';
@@ -763,12 +845,12 @@ words: pool,
 punctEn: s.taPunctEn === 1,
 textOnly: true,
 skipDict: true,
-clampToPool: false,
+clampToPool: true,
 raw: true
 });
 }
-const min = Math.max(1, s.taMinCards);
-const max = Math.max(min, s.taMaxCards);
+const min = Math.max(1, Math.min(s.taMinCards, pool.length));
+const max = Math.max(min, Math.min(s.taMaxCards, pool.length));
 const n = min + Math.floor(Math.random() * (max - min + 1));
 const parts = [];
 for (let i = 0; i < n; i++) parts.push(pool[Math.floor(Math.random() * pool.length)]);
@@ -803,6 +885,7 @@ return;
 }
 if (Math.random() * 100 >= s.taWriteProb) return;
 let content = taDiaryContent(s);
+if (!content) return;
 if (s.taContent && s.taContent.trim()) content = s.taContent.trim() + '\n\n' + content;
 const list = loadEntries();
 list.push({ id: genId(), content: content, ts: now, author: 'ta' });
